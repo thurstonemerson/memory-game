@@ -43,38 +43,35 @@ class Game(ndb.Model):
         game = Game(first_user=first_user,
                     second_user=second_user,
                     next_move=first_user)
-        deck = game.make_deck()
-        game.board = game.make_grid(deck)
+        deck = game.make_carddeck()
+        game.board = game.make_gridboard(deck)
         game.history = []
         game.put()
         return game
     
-    def make_deck(self):
-        """"create a deck of cards with two of each tile"""
+    def make_carddeck(self):
+        """"create a deck of cards with two of each card"""
         deck = []
-        for title in TileTitles:
-            deck.append(title)
-            deck.append(title)
+        for name in CardNames:
+            card = Card(card_name=name)
+            deck.append(card)
+            deck.append(card)
             
-        logging.info("Completed deck {0}".format(deck))
+        logging.info("Completed building card deck {0}".format(deck))
         return deck
     
-    def make_grid(self,deck):
-        """"make a randomly placed grid from a deck of tiles"""
-        gridDimension = int(math.sqrt(len(deck)))
-        gridboard = []
-        
-        for x in range(gridDimension):
-            row = []
-            for y in range(gridDimension):
-                tile = random.choice(deck)
-                row.append(tile)
-                logging.info("Setting grid{0}{1} to {2}".format(x, y, tile))
-                deck.remove(tile)
-            gridboard.append(row)
-            
-        logging.info("Completed grid {0}".format(gridboard))
+    def make_gridboard(self, deck):
+        """"make a gridboard from a deck of cards with random placement"""
+        griddimension = int(math.sqrt(len(deck)))
+        gridboard = [[self.remove_random_card_from_deck(deck) for row in range(griddimension)] for col in range(griddimension)]
+        logging.info("Completed building grid board {0}".format(gridboard))
         return gridboard
+    
+    def remove_random_card_from_deck(self, deck):
+        """Select and return a random card, removing it from the deck"""
+        card = random.choice(deck)
+        deck.remove(card)
+        return card
 
     def to_form(self, message):
         """Returns a GameForm representation of the Game"""
@@ -120,25 +117,36 @@ class MakeMoveForm(messages.Message):
     """Used to make a move in an existing game"""
     user_name = messages.StringField(1, required=True)
     move = messages.IntegerField(2, required=True)
-    
-#     @classmethod
-#     def flip():
-#         flipped = not flipped
-
-
 
 class StringMessage(messages.Message):
     """StringMessage-- outbound (single) string message"""
     message = messages.StringField(1, required=True)
     
 
-class TileTitles(messages.Enum):
-    """The title of tiles to be used in the memory game"""
-    EIGHT_BALL = 1
-    KRONOS = 2
-    BAKED_POTATO = 3
-    DINOSAUR = 4
-    ROCKET= 5
-    SKINNY_UNICORN = 6
-    THAT_GUY = 7
-    ZEPPELIN = 8
+class CardNames(messages.Enum):
+    """The names of the cards to be used in the memory game"""
+    DEATH = 1
+    TEMPERANCE = 2
+    HIGH_PRIESTESS = 3
+    HERMIT = 4
+    HANGED_MAN = 5
+    LOVERS = 6
+    JUSTICE = 7
+    FOOL = 8
+    
+class Card():
+    """"A card used in the deck of cards"""
+    def __init__(self, card_name):
+        self.card_name = card_name
+        self.flipped = False
+    
+    def flip(self):
+        self.flipped = not self.flipped
+    
+    def __repr__(self):
+        return self.card_name.name    
+       
+    def __str__(self):
+        return self.card_name.name
+    
+
