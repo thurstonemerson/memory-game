@@ -58,7 +58,7 @@ class MemoryApi(remote.Service):
 
         game = Game.new_game(first_user.key, second_user.key)
 
-        return game.to_form('Good luck playing Memory!')
+        return game.to_form('Good luck playing Memory, it\'s {0}\'s turn first!'.format(first_user.name))
 
     @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=GameForm,
@@ -81,8 +81,14 @@ class MemoryApi(remote.Service):
     def make_move(self, request):
         """Makes a move. Returns a game state with message"""
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
+        if not game:
+            raise endpoints.NotFoundException('Game not found')
         if game.game_over:
-            return game.to_form('Game already over!')
+            raise endpoints.NotFoundException('Game already over')
+
+        user = User.query(User.name == request.user_name).get()
+        if user.key != game.next_move:
+            raise endpoints.BadRequestException('It\'s not your turn!')
         
         message = "Not implemented"
     
