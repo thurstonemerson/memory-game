@@ -62,6 +62,18 @@ class Game(ndb.Model):
         logging.info("Completed building card deck {0}".format(deck))
         return deck
     
+    def get_max_row_number(self):
+        """Returns the maximum row number allowed for the gridboard"""
+        logging.info("Maximum gridboard row number: {0}".format(len(self.board)-1)) 
+        return len(self.board)-1
+    
+    def get_max_col_number(self):
+        """Returns the maximum column number allowed for the gridboard"""
+        if self.get_max_row_number() >= 0:
+            logging.info("Maximum gridboard col number: {0}".format(len(self.board[0])-1))
+            return len(self.board[0])-1
+        return 0
+    
     def make_gridboard(self, deck):
         """"make a gridboard from a deck of cards with random placement"""
         griddimension = int(math.sqrt(len(deck)))

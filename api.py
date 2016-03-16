@@ -93,12 +93,11 @@ class MemoryApi(remote.Service):
         row = request.row
         column = request.column
         
-        # TODO make this integer a bit more meaningful
         # Verify move is valid
-        if row < 0 or row > 3:
-            raise endpoints.BadRequestException('Row must be between 0 and 3')
-        if column < 0 or column > 3:
-            raise endpoints.BadRequestException('Column must be between 0 and 3')
+        if row < 0 or row > game.get_max_row_number():
+            raise endpoints.BadRequestException('Requested row is out of bounds')
+        if column < 0 or column > game.get_max_col_number():
+            raise endpoints.BadRequestException('Requested column is out of bounds')
         
         # Check that the card has not already been flipped    
         if game.board[row][column].flipped is True:
