@@ -10,7 +10,7 @@ from protorpc import remote, messages
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 
-from models import User, Game
+from models import User, Game, Move
 from models import StringMessage, NewGameForm, GameForm, MakeMoveForm
 from utils import get_by_urlsafe
 
@@ -90,36 +90,34 @@ class MemoryApi(remote.Service):
         if user.key != game.next_move:
             raise endpoints.BadRequestException('It\'s not your turn!')
         
-        message = "Not implemented"
-    
-#         if tile.flipped:
-#             pass
-# 
-#         tile.flip();
-# 
-#         if firstGuess is None or secondGuess is not None:
-# 
-#             #two unmatching guesses have been made already, start a new guess
-#             if secondGuess is not None:
-#                 firstGuess.flip();
-#                 secondGuess.flip();
-#                 firstGuess = secondGuess = None
-#             
-#             #you have made a first guess, you have one more guess to make
-#             firstGuess = tile
-#             message = "One more guess to make"
-# 
-#         else:
-# 
-#             #If the first guess matches the selected tile, we have a match
-#             if firstGuess.title == tile.title:
-#                 unmatchedPairs--
-#                 message = (this.unmatchedPairs > 0) ? "You made a match" : "You won the game";
-#                 firstGuess = secondGuess = None
-#             else:
-#                 secondGuess = tile
-#                 message = "Not a match"
-     
+        row = request.row
+        column = request.column
+        
+        # TODO make this integer a bit more meaningful
+        # Verify move is valid
+        if row < 0 or row > 3:
+            raise endpoints.BadRequestException('Row must be between 0 and 3')
+        if column < 0 or column > 3:
+            raise endpoints.BadRequestException('Column must be between 0 and 3')
+        
+        # Check that the card has not already been flipped    
+        if game.board[row][column].flipped is True:
+            raise endpoints.BadRequestException('Card has already been flipped')
+
+        # Keep track of whose turn it is
+        is_first_user = True if user.key == game.first_user else False
+
+        # Make the move on the gridboard
+        message = game.make_move(row, column, is_first_user)
+        
         return game.to_form(message)
+    
+    def get_greetings(self, game):
+        firstguess = memcache.get('{}:firstguess'.format(game))
+        if firstguess is None:
+            firstguess = self.render_greetings(guestbook_name)
+            if not memcache.add('{}:greetings'.format(guestbook_name), greetings, 10):
+                logging.error('Memcache set failed.')
+        return greetings
         
 api = endpoints.api_server([MemoryApi])
