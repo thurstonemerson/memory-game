@@ -5,7 +5,7 @@ User api concerned primarily with communicating to/from the api's users. Contain
 api endpoints to create a user.
 User logic and persistence is manipulated in the user service module.
 
-@author: Jessica
+@author: thurstonemerson
 '''
 
 import endpoints

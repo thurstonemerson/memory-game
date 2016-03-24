@@ -14,11 +14,20 @@ class Game(ndb.Model):
     next_move = ndb.KeyProperty(required=True) # The User's whose turn it is
     first_user = ndb.KeyProperty(required=True, kind='User')
     second_user = ndb.KeyProperty(required=True, kind='User')
+    first_user_score = ndb.IntegerProperty(default=0)
+    second_user_score = ndb.IntegerProperty(default=0)
+    unmatched_pairs = ndb.IntegerProperty(default=0)
     game_over = ndb.BooleanProperty(required=True, default=False)
     winner = ndb.KeyProperty()
     history = ndb.PickleProperty(required=True)
     firstGuess = ndb.PickleProperty()
     secondGuess = ndb.PickleProperty()
+    
+class Match(ndb.Model):
+    """Score object"""
+    date = ndb.DateProperty(required=True)
+    winner = ndb.KeyProperty(required=True)
+    loser = ndb.KeyProperty(required=True)
 
 class CardNames(messages.Enum):
     """The names of the cards to be used in the memory game"""

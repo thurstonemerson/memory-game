@@ -11,10 +11,13 @@ class GameForm(messages.Message):
     """GameForm for outbound game state information"""
     urlsafe_key = messages.StringField(1, required=True)
     board = messages.StringField(2, required=True)
-    next_move = messages.StringField(5, required=True)
-    game_over = messages.BooleanField(6, required=True)
-    message = messages.StringField(7, required=True)
-    #winner = messages.StringField(7)
+    next_move = messages.StringField(3, required=True)
+    game_over = messages.BooleanField(4, required=True)
+    unmatched_pairs = messages.IntegerField(5, required=True)
+    first_user_score = messages.IntegerField(6, required=True)
+    second_user_score = messages.IntegerField(7, required=True)
+    message = messages.StringField(8, required=True)
+    winner = messages.StringField(9)
 
 
 class NewGameForm(messages.Message):

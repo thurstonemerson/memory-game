@@ -45,8 +45,6 @@ class Service(object):
                 raise endpoints.BadRequestException('Invalid Key')
             else:
                 raise
-        
-
         model = key.get()
         if not model:
             return None
@@ -85,7 +83,7 @@ class Service(object):
     
     def create(self, request):
         """Returns a new, saved instance of the service's model class.
-        :param **kwargs: instance parameters
+        :param request: instance parameters
         """
     
         return self.save(self.new(request))

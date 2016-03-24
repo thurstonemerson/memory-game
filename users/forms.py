@@ -11,3 +11,12 @@ class StringMessage(messages.Message):
     """StringMessage-- outbound (single) string message"""
     message = messages.StringField(1, required=True)
     
+
+class UserForm(messages.Message):
+    """User Form"""
+    name = messages.StringField(1, required=True)
+    email = messages.StringField(2)
+    wins = messages.IntegerField(3, required=True)
+    total_played = messages.IntegerField(4, required=True)
+    win_percentage = messages.FloatField(5, required=True)
+    

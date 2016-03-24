@@ -121,9 +121,17 @@ class GamesService(Service):
  
             #If the second guess returns true, we have made a match
             if self.make_second_guess(game, row, column) == True:
-                #self.unmatchedPairs--
-                #message = (this.unmatchedPairs > 0) ? "You made a match" : "Game over";
-                message = "You made a match"
+                #add one to the user score
+                self.increment_score(game, first_user)
+                #decrement the number of card pairs left to find
+                game.unmatched_pairs-=1
+                #Check to see if the game has been completed
+                if game.unmatched_pairs == 0:
+                    #check who has the highest score and assign a winner
+                    self.assign_winner(game)
+                    message = "Game over"
+                else:
+                    message = "You made a match"
             else: #We didn't make a match, so it is the other players turn
                 game.next_move = game.second_user if first_user else game.first_user
                 message = "Not a match"
@@ -131,6 +139,22 @@ class GamesService(Service):
         super(GamesService, self).save(game)
         
         return message
+    
+    def increment_score(self, game, first_user):
+        """Increment the score for a particular user"""
+        if first_user:
+            game.first_user_score += 1
+        else:
+            game.second_user_score += 1    
+            
+    def assign_winner(self, game):
+        """Check the scores and assign the winning user"""
+        game.game_over = True
+        if game.first_user_score > game.second_user_score:
+            game.winner = game.first_user  
+        else: 
+            game.winner = game.second_user
+         
         
     def make_first_guess(self, game, row, column):
         """Make a first guess on the gridboard at the specified row and column"""
@@ -175,9 +199,12 @@ class GamesService(Service):
                         board = str(game.board),
                         next_move=game.next_move.get().name,
                         game_over=game.game_over,
-                        message=message)
-        #if self.winner:
-        #    form.winner = self.winner.get().name
+                        message=message,
+                        first_user_score=game.first_user_score,
+                        second_user_score=game.second_user_score,
+                        unmatched_pairs=game.unmatched_pairs)
+        if game.winner:
+            form.winner = game.winner.get().name
         return form
 
 #     def end_game(self, winner):
