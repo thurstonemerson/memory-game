@@ -19,7 +19,6 @@ class Game(ndb.Model):
     unmatched_pairs = ndb.IntegerProperty(default=0)
     game_over = ndb.BooleanProperty(required=True, default=False)
     winner = ndb.KeyProperty()
-    history = ndb.PickleProperty(required=True)
     firstGuess = ndb.PickleProperty()
     secondGuess = ndb.PickleProperty()
     

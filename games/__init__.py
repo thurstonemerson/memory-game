@@ -24,7 +24,7 @@ class GamesService(Service):
         #create a new game model and initialise with user details, gridboard
         game = super(GamesService, self).new()
         data = {"first_user": first_user, "second_user": second_user, 
-               "board": self.make_gridboard(deck), "history": [], 
+               "board": self.make_gridboard(deck), 
                "unmatched_pairs": len(CardNames), "next_move": first_user}
          
         super(GamesService, self).update(game, **data)
