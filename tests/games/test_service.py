@@ -83,12 +83,12 @@ class GameTest(unittest.TestCase):
                     
     def test_get_by_name_and_urlsafe(self):  
         """Testing retrieval of game by name and urlsafemode"""     
-        #(game, first_user, second_user) = self._get_new_game()       
-                
-        #games.get_by_urlsafe(game.) 
-        
-        #test invalid model
-        #games.get_by_name(model_name)    
+        (game, first_user, second_user) = self._get_new_game()       
+              
+        #test get model by urlsafe key
+        self.assertEqual(games.get_by_urlsafe(game.key.urlsafe()).key, game.key) 
+        self.assertRaises(endpoints.BadRequestException, games.get_by_urlsafe, "")
+        self.assertRaises(ValueError, games.get_by_urlsafe, first_user.key.urlsafe())           
             
             
     def test_is_valid_move(self):  
