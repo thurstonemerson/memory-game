@@ -7,7 +7,8 @@ Uses a sqllite database so that the google app engine doesn't need to be running
 @author: Jessica
 '''
 import unittest
-import logging
+import endpoints
+
 from services import games
 from users.models import User
 from games.models import CardNames, Card
@@ -25,7 +26,6 @@ class GameTest(unittest.TestCase):
     
     def setUp(self):
         """Set up the test bed and activate it"""
-        logging.info("Setting up testbed...")
         # First, create an instance of the Testbed class.
         self.testbed = testbed.Testbed()
         # Then activate the testbed, which prepares the service stubs for use.
@@ -51,7 +51,6 @@ class GameTest(unittest.TestCase):
 
     def test_new_game(self):
         """Create a new game and test all the default information is correct"""
-        logging.info("Testing game creation")
 
         (game, first_user, second_user) = self._get_new_game()
         
@@ -82,14 +81,48 @@ class GameTest(unittest.TestCase):
                         
             self.assertEqual(num, 2, "There must be 2 {0} in the card deck, only contains {1}".format(card_name, num))
                     
+    def test_get_by_name_and_urlsafe(self):  
+        """Testing retrieval of game by name and urlsafemode"""     
+        #(game, first_user, second_user) = self._get_new_game()       
+                
+        #games.get_by_urlsafe(game.) 
+        
+        #test invalid model
+        #games.get_by_name(model_name)    
+            
             
     def test_is_valid_move(self):  
-        """Test that valid moves are allowed and invalid moves are not"""     
-        logging.info("Testing is valid move")
+        """Test that valid moves are allowed and invalid moves are not"""  
+        (game, first_user, second_user) = self._get_new_game()
+        
+        #test that a move outside of the gridboard boundary throws an exception
+        self.assertRaises(endpoints.BadRequestException, games.is_valid_move, game, 4, 0)
+        self.assertRaises(endpoints.BadRequestException, games.is_valid_move, game, 0, 4)
+        self.assertRaises(endpoints.BadRequestException, games.is_valid_move, game, -1, 0)
+        self.assertRaises(endpoints.BadRequestException, games.is_valid_move, game, 0, -1)
+           
+        #test that move where card is already flipped is invalid
+        game.board[3][3].flip()
+        game.put()
+        self.assertRaises(endpoints.BadRequestException, games.is_valid_move, game, 3, 3)
+        
+        #test that a move in the gridboard boundary where card isn't flipped is valid
+        self.assertTrue(games.is_valid_move(game, 0, 0))
+        
+        #test that it doesn't throw an exception if asked
+        try:
+            games.is_valid_move(game, 4, 0, False)
+            games.is_valid_move(game, 3, 3, False)
+            games.is_valid_move(game, 0, 0, False)
+        except endpoints.BadRequestException:
+            self.fail("is_valid_move raised BadRequestException unexpectedly")
+            
+        #test that false is returned when move is invalid or card is flipped
+        self.assertFalse(games.is_valid_move(game, 4, 0, False))
+        self.assertFalse(games.is_valid_move(game, 3, 3, False))
         
     def test_to_form(self):   
-        """Test that a game form can be created"""   
-        logging.info("Testing to form")
+        """Test that a game form can be created"""
         message = "This is a message"
         (game, first_user, second_user) = self._get_new_game()
         game_form = games.to_form(game, message)
@@ -120,10 +153,8 @@ class GameTest(unittest.TestCase):
         
     def test_make_move(self):    
         """Test that a move can be made"""   
-        logging.info("Testing make a move")
         
         
     def tearDown(self):
         """Tear down the test bed by deactivating it"""
-        logging.info("Tearing down testbed...")
         self.testbed.deactivate()
