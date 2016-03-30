@@ -35,10 +35,9 @@ class GameTest(unittest.TestCase):
         self.testbed.init_memcache_stub()
         # Clear ndb's in-context cache between tests.
         ndb.get_context().clear_cache()
-
-    def test_new_game(self):
-        """Create a new game and test all the default information is correct"""
-        logging.info("Testing game creation")
+        
+    def _get_new_game(self):
+        """Create a brand new game and return it"""
         first_user = User(name=u'good golly', email=u'generic@thingy.com')
         first_user.put()
         
@@ -47,6 +46,14 @@ class GameTest(unittest.TestCase):
         
         #create a new game
         game = games.new_game(first_user.key, second_user.key)
+        return (game, first_user, second_user)
+        
+
+    def test_new_game(self):
+        """Create a new game and test all the default information is correct"""
+        logging.info("Testing game creation")
+
+        (game, first_user, second_user) = self._get_new_game()
         
         #check that the game details were created with correct default values
         self.assertEqual(game.first_user, first_user.key)
@@ -81,8 +88,35 @@ class GameTest(unittest.TestCase):
         logging.info("Testing is valid move")
         
     def test_to_form(self):   
-        """Test that a game form can be created"""    
+        """Test that a game form can be created"""   
         logging.info("Testing to form")
+        message = "This is a message"
+        (game, first_user, second_user) = self._get_new_game()
+        game_form = games.to_form(game, message)
+        
+        self.assertEqual(game.key.urlsafe(), game_form.urlsafe_key)
+        self.assertEqual(str(game.board), game_form.board)
+        self.assertEqual(first_user.name, game_form.next_move)
+        self.assertFalse(game_form.game_over)
+        self.assertEqual(game.unmatched_pairs, game_form.unmatched_pairs)
+        self.assertEqual(game.first_user_score, game_form.first_user_score)
+        self.assertEqual(game.second_user_score, game_form.second_user_score)
+        self.assertEqual(message, game_form.message)
+        self.assertEqual(game.winner, game_form.winner)
+        
+        #test winner if true
+        game.winner = first_user.key
+        game.put()
+        game_form = games.to_form(game, message)
+        self.assertEqual(first_user.name, game_form.winner)
+        
+        #test next move
+        game.next_move = second_user.key
+        game.put()
+        game_form = games.to_form(game, message)
+        self.assertEqual(second_user.name, game_form.next_move)
+        
+        
         
     def test_make_move(self):    
         """Test that a move can be made"""   
