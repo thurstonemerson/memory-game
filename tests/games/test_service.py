@@ -81,7 +81,7 @@ class GameTest(unittest.TestCase):
                         
             self.assertEqual(num, 2, "There must be 2 {0} in the card deck, only contains {1}".format(card_name, num))
                     
-    def test_get_by_name_and_urlsafe(self):  
+    def test_get_by_urlsafe(self):  
         """Testing retrieval of game by name and urlsafemode"""     
         (game, first_user, second_user) = self._get_new_game()       
               
