@@ -23,6 +23,7 @@ class GameTest(unittest.TestCase):
         'datastore_file': 'c:/temp/nosegae.sqlite3',  
         'use_sqlite': True  
     }
+       
     
     def setUp(self):
         """Set up the test bed and activate it"""
@@ -48,6 +49,15 @@ class GameTest(unittest.TestCase):
         game = games.new_game(first_user.key, second_user.key)
         return (game, first_user, second_user)
         
+    def _get_new_game_with_mock_gridboard(self):
+        (game, first_user, second_user) = self._get_new_game()  
+        gridboard = [[Card(card_name=CardNames.DEATH), Card(card_name=CardNames.FOOL), Card(card_name=CardNames.DEATH), Card(card_name=CardNames.HIGH_PRIESTESS)],
+                     [Card(card_name=CardNames.HANGED_MAN), Card(card_name=CardNames.TEMPERANCE), Card(card_name=CardNames.HIGH_PRIESTESS), Card(card_name=CardNames.LOVERS)],
+                     [Card(card_name=CardNames.JUSTICE), Card(card_name=CardNames.FOOL), Card(card_name=CardNames.HERMIT), Card(card_name=CardNames.LOVERS)],
+                     [Card(card_name=CardNames.JUSTICE), Card(card_name=CardNames.HANGED_MAN), Card(card_name=CardNames.TEMPERANCE), Card(card_name=CardNames.HERMIT)]]
+        game.board = gridboard
+        game.put()
+        return (game, first_user, second_user)
 
     def test_new_game(self):
         """Create a new game and test all the default information is correct"""
@@ -149,12 +159,116 @@ class GameTest(unittest.TestCase):
         game_form = games.to_form(game, message)
         self.assertEqual(second_user.name, game_form.next_move)
         
+    
+    def test_make_move_game_ended(self): 
+        """Test that a game is ended when all pairs are found"""  
+        (game, first_user, second_user) = self._get_new_game_with_mock_gridboard()
+        
+        games.make_move(game, 0, 0, True) #DEATH
+        games.make_move(game, 0, 2, True)
+        self.assertFalse(game.game_over)  
+         
+        games.make_move(game, 0, 1, True) #FOOL
+        games.make_move(game, 2, 1, True)
+        self.assertFalse(game.game_over)  
+        
+        games.make_move(game, 0, 3, True) #HIGH_PRIESTESS
+        games.make_move(game, 1, 2, True)
+        self.assertFalse(game.game_over)  
+        
+        games.make_move(game, 1, 0, True) #HANGED_MAN
+        games.make_move(game, 3, 1, True)
+        self.assertFalse(game.game_over)  
+        
+        games.make_move(game, 1, 1, True) #TEMPERANCE
+        games.make_move(game, 3, 2, True)
+        self.assertFalse(game.game_over)  
+        
+        games.make_move(game, 1, 3, True) #LOVERS
+        games.make_move(game, 2, 3, True)
+        self.assertFalse(game.game_over)  
+        
+        games.make_move(game, 2, 0, True) #JUSTICE
+        games.make_move(game, 3, 0, True)
+        
+        games.make_move(game, 3, 3, True) #HERMIT
+        games.make_move(game, 2, 2, True)
+        
+        #test game is ended when all pairs are found
+        self.assertTrue(game.game_over)  
+       
+        #test correct winner is assigned
+        self.assertEqual(game.winner, first_user.key)
         
         
-    def test_make_move(self):    
-        """Test that a move can be made"""   
+    def test_make_move_match_made(self):    
+        """Test that a move can be played where the cards match"""  
+        
+        (game, first_user, second_user) = self._get_new_game_with_mock_gridboard()
+        unmatched_pairs_temp = game.unmatched_pairs
+          
+        #make the first move, flip DEATH. Test first guess made.  
+        message = games.make_move(game, 0, 0, True)
+        self.assertEqual(message, "One more guess to make")  
+        
+        #test card is flipped
+        self.assertTrue(game.board[0][0].flipped)
+        
+        #make the second move, flip DEATH. Test match was made.
+        message = games.make_move(game, 0, 2, True)  
+        self.assertEqual(message, "You made a match")  
+        self.assertTrue(game.board[0][2].flipped)
+        
+        #test turn is not rotated when a match is made
+        self.assertEqual(game.next_move, first_user.key)
+        
+        #test unmatched pairs is decremented
+        self.assertEqual(game.unmatched_pairs, (unmatched_pairs_temp-1))
+        
+        #after a match is made test the cards are still flipped 
+        #after the next turn. 
+        message = games.make_move(game, 0, 3, True)  
+        self.assertTrue(game.board[0][0].flipped)
+        self.assertTrue(game.board[0][2].flipped)
+        
+        #test first user score is incremented and second user score is not
+        self.assertEqual(game.first_user_score, 1)
+        self.assertEqual(game.second_user_score, 0)
+        
+        
+    def test_make_move_match_not_made(self):    
+        """Test that a move can be played where the cards don't match""" 
+        (game, first_user, second_user) = self._get_new_game_with_mock_gridboard()
+        unmatched_pairs_temp = game.unmatched_pairs
+          
+        #make the first move, flip DEATH. Test first guess made.  
+        message = games.make_move(game, 0, 0, True)
+        self.assertEqual(message, "One more guess to make")  
+          
+        #test card is flipped
+        self.assertTrue(game.board[0][0].flipped)
+        
+        #make the second move, flip FOOL. Test match wasn't made.
+        message = games.make_move(game, 0, 1, True)  
+        self.assertEqual(message, "Not a match")  
+        self.assertTrue(game.board[0][1].flipped)
+        
+        #test turn is rotated when a match isn't made
+        self.assertEqual(game.next_move, second_user.key)
+        
+        #test unmatched pairs is not decremented
+        self.assertEqual(game.unmatched_pairs, unmatched_pairs_temp)
+        
+        #after a match is not made test the cards have been flipped 
+        #back after the next turn. 
+        message = games.make_move(game, 0, 3, False)  
+        self.assertFalse(game.board[0][0].flipped)
+        self.assertFalse(game.board[0][1].flipped)
         
         
     def tearDown(self):
         """Tear down the test bed by deactivating it"""
         self.testbed.deactivate()
+        
+        
+        
