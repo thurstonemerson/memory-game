@@ -4,7 +4,7 @@ Created on 30/03/2016
 Testing module for running unit tests on public methods from the games service.
 Uses a sqllite database so that the google app engine doesn't need to be running.
 
-@author: Jessica
+@author: thurstonemerson
 '''
 import unittest
 import endpoints
