@@ -67,7 +67,14 @@ class UserTest(unittest.TestCase):
         self.assertRaises(datastore_errors.BadValueError, users.create, None)    
 
     def test_get_by_name(self):
-        """Create a new game and test all the default information is correct"""
+        """Test that you are able to retrieve a user by name"""
+        user = User(name=u'good golly', email=u'generic@thingy.com')
+        user.put()
+        
+        new_user = users.get_by_name(user.name)
+        self.assertEquals(user.key, new_user.key)
+        self.assertEquals(None, users.get_by_name(""))
+        
         
     def tearDown(self):
         """Tear down the test bed by deactivating it"""
