@@ -6,36 +6,16 @@ Uses a sqllite database so that the google app engine doesn't need to be running
 
 @author: thurstonemerson
 '''
-import unittest
-import endpoints
+from tests import MemoryGameUnitTest
 
 from services import games
 from users.models import User
 from games.models import CardNames, Card
 
-from google.appengine.ext import ndb
-from google.appengine.ext import testbed
+import endpoints
  
 
-class GameTest(unittest.TestCase):
-    nosegae_datastore_v3 = True
-    nosegae_datastore_v3_kwargs = {  
-        'datastore_file': 'c:/temp/nosegae.sqlite3',  
-        'use_sqlite': True  
-    }
-       
-    
-    def setUp(self):
-        """Set up the test bed and activate it"""
-        # First, create an instance of the Testbed class.
-        self.testbed = testbed.Testbed()
-        # Then activate the testbed, which prepares the service stubs for use.
-        self.testbed.activate()
-        # Next, declare which service stubs you want to use.
-        self.testbed.init_datastore_v3_stub()
-        self.testbed.init_memcache_stub()
-        # Clear ndb's in-context cache between tests.
-        ndb.get_context().clear_cache()
+class GameTest(MemoryGameUnitTest):
         
     def _get_new_game(self):
         """Create a brand new game and return it"""
@@ -266,9 +246,6 @@ class GameTest(unittest.TestCase):
         self.assertFalse(game.board[0][1].flipped)
         
         
-    def tearDown(self):
-        """Tear down the test bed by deactivating it"""
-        self.testbed.deactivate()
         
         
         
