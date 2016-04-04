@@ -95,6 +95,15 @@ class GameTest(MemoryGameUnitTest):
         
         #one game returned
         self.assertEqual(len(games.get_user_games(first_user)), 1)
+        
+    def test_delete_game(self):
+        """Test that games are able to be deleted via the games service"""
+        (game, first_user, second_user) = self._get_new_game()
+           
+        try:
+            games.delete(game)
+        except Exception:
+            self.fail("Delete game failed unexpectedly")
           
         
     def test_is_valid_move(self):  

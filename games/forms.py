@@ -7,6 +7,10 @@ Forms to be used when interacting with the game module of the memory api
 '''
 from protorpc import messages
 
+class StringMessage(messages.Message):
+    """StringMessage-- outbound (single) string message"""
+    message = messages.StringField(1, required=True)
+
 class GameForm(messages.Message):
     """GameForm for outbound game state information"""
     urlsafe_key = messages.StringField(1, required=True)

@@ -106,5 +106,12 @@ class Service(object):
             setattr(model, k, v)
         self.save(model)
         return model
+    
+    def delete(self, model):
+        """Immediately deletes the specified model instance.
+        :param model: the model instance to delete
+        """
+        self._isinstance(model)
+        model.key.delete()
 
     

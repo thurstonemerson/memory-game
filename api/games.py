@@ -12,7 +12,7 @@ import endpoints
 from protorpc import remote, messages
 from api import memory_api
 
-from forms import NewGameForm, GameForm, GameForms, MakeMoveForm
+from forms import NewGameForm, GameForm, GameForms, MakeMoveForm, StringMessage
 
 from services import games, users 
 
@@ -106,4 +106,21 @@ class GameApi(remote.Service):
             raise endpoints.BadRequestException('User not found!')
         user_games = games.get_user_games(user)
         return GameForms(items=[games.to_form(game) for game in user_games])
+    
+    @endpoints.method(request_message=GET_GAME_REQUEST,
+                      response_message=StringMessage,
+                      path='game/{urlsafe_game_key}',
+                      name='cancel_game',
+                      http_method='DELETE')
+    def cancel_game(self, request):
+        """Cancel a game. Game must not have ended to be canceled"""
+        game = games.get_by_urlsafe(request.urlsafe_game_key)
+        if game and not game.game_over:
+            games.delete(game)
+            return StringMessage(message='Game canceled with key: {}.'.
+                                 format(request.urlsafe_game_key))
+        elif game and game.game_over:
+            raise endpoints.BadRequestException('Game is already over!')
+        else:
+            raise endpoints.NotFoundException('Game not found!')
         
