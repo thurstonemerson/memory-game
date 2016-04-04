@@ -85,5 +85,10 @@ class GameApi(remote.Service):
         # Make the move on the gridboard, change turn of user if necessary
         message = games.make_move(game, request.row, request.column, (user.key == game.first_user))
          
+        #if the game is over, assign a winner and loser 
+        if game.game_over:
+            users.add_win(game.winner.get())
+            users.add_loss(game.loser.get()) 
+         
         return games.to_form(game, message)
         

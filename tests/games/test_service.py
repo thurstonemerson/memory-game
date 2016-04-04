@@ -53,6 +53,7 @@ class GameTest(MemoryGameUnitTest):
         self.assertEqual(game.next_move, first_user.key)
         self.assertFalse(game.game_over)
         self.assertIsNone(game.winner)
+        self.assertIsNone(game.loser)
         self.assertIsNotNone(game.board)
         
         #check every game piece is a card
@@ -179,6 +180,7 @@ class GameTest(MemoryGameUnitTest):
        
         #test correct winner is assigned
         self.assertEqual(game.winner, first_user.key)
+        self.assertEqual(game.loser, second_user.key)
         
         
     def test_make_move_match_made(self):    

@@ -40,6 +40,22 @@ class UserTest(MemoryGameUnitTest):
         self.assertEquals(user.key, new_user.key)
         self.assertEquals(None, users.get_by_name(""))
         
+    def test_get_user_rankings(self):
+        """Test that you are able to retrieve a list of all users ranked by win percentage"""
+        user = User(name=u'no win', email=u'generic@thingy.com')
+        user.put()
+        
+        userone = User(name=u'one win', email=u'generic@thingy.com', total_played=1, wins=1)
+        userone.put()
+        
+        usertwo = User(name=u'two wins', email=u'generic@thingy.com', total_played=2, wins=1)
+        usertwo.put()
+        
+        user_rankings = users.get_user_rankings()
+        self.assertEquals(len(user_rankings), 2)
+        self.assertEquals(user_rankings.pop().key, usertwo.key)
+        self.assertEquals(user_rankings.pop().key, userone.key)
+        
         
 class Request():
     """Mocking the google app engine request class"""

@@ -154,9 +154,11 @@ class GamesService(Service):
         """Check the scores and assign the winning user"""
         game.game_over = True
         if game.first_user_score > game.second_user_score:
-            game.winner = game.first_user  
+            game.winner = game.first_user
+            game.loser = game.second_user  
         else: 
             game.winner = game.second_user
+            game.loser = game.first_user
          
         
     def _make_first_guess(self, game, row, column):

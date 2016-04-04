@@ -11,7 +11,7 @@ User logic and persistence is manipulated in the user service module.
 import endpoints
 from protorpc import remote, messages
 
-from forms import StringMessage
+from forms import StringMessage, UserForms
 from services import users 
 
 from api import memory_api
@@ -37,3 +37,12 @@ class UserApi(remote.Service):
             
         return StringMessage(message='User {} created!'.format(
                 request.name))
+        
+    @endpoints.method(response_message=UserForms,
+                      path='user/ranking',
+                      name='get_user_rankings',
+                      http_method='GET')
+    def get_user_rankings(self, request):
+        """Return all Users ranked by their win percentage"""
+        user_rankings = users.get_user_rankings() 
+        return UserForms(items=[users.to_form(user) for user in user_rankings])

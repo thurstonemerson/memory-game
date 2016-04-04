@@ -60,6 +60,14 @@ class Service(object):
         """
         return self.__model__.query(self.__model__.name == model_name).get()
 
+    def find(self, *args):
+        """Returns a list of instances of the service's model filtered by the
+        specified key word arguments.
+        :param *args: a single filter argument
+        """
+        return self.__model__.query().filter(*args).fetch()
+
+
     def save(self, model):
         """Commits the model to the database and returns the model
         :param model: the model to save
