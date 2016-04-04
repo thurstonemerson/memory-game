@@ -6,23 +6,78 @@ is contained. Persistence is dealt with in the service.
 
 @author: thurstonemerson
 '''
-from models import Game, CardNames, Card, Move
-from forms import GameForm
+from models import Game, CardNames, Card, Move, Score
+from forms import GameForm, ScoreForm
 from core import Service
 from google.appengine.ext import ndb
+from datetime import date
 import logging
 import math
 import random
 import endpoints
 
+class ScoreService(Service):
+    """Service class interacting with the Score datastore"""
+    __model__ = Score
+    
+    #-----------------------------------------------------------------------
+    #Create a new score on the scoreboard
+    #-----------------------------------------------------------------------
+    
+    def new_score(self, winner, loser, first_user_score, second_user_score):
+        """Creates and returns a new score, persisting to the google datastore"""
+       
+        if first_user_score == second_user_score:
+                raise endpoints.BadRequestException('Score cannot be created, game was a draw')
+         
+        #create a new score and initialise with winner/loser deatils
+        score = super(ScoreService, self).new()
+        data = {"date": date.today(), "winner": winner, "loser": loser, 
+               "winner_score": first_user_score if first_user_score > second_user_score else second_user_score, 
+               "loser_score": first_user_score if first_user_score < second_user_score else second_user_score}
+         
+        super(ScoreService, self).update(score, **data)
+        return score
+    
+    #-----------------------------------------------------------------------
+    #Return a list of scores from the specified user
+    #-----------------------------------------------------------------------
+  
+    
+    def get_user_scores(self, user):
+        """Returns a list of scores by the requested user"""
+        games = Score.query(ndb.OR(Score.winner == user.key,
+                                    Score.loser == user.key)).fetch()
+        return games
+    
+    #-----------------------------------------------------------------------
+    #Create a form from a score
+    #-----------------------------------------------------------------------
+  
+
+    def to_form(self, score):
+        """Returns a ScoreForm representation of the Score"""
+        form = ScoreForm(date=str(score.date),
+                         winner=score.winner.get().name,
+                         loser=score.loser.get().name,
+                         winner_score=score.winner_score,
+                         loser_score=score.loser_score)
+        return form
+
 class GamesService(Service):
+    """Service class interacting with the Game datastore"""
     __model__ = Game
     
+    #-----------------------------------------------------------------------
+    #Return a list of active games from the specified user
+    #-----------------------------------------------------------------------
+  
     def get_user_games(self, user):
         """Returns a list of active games by the requested user"""
         games = Game.query(ndb.OR(Game.first_user == user.key,
                                   Game.second_user == user.key)).filter(Game.game_over == False).fetch()
         return games
+    
         
     #-----------------------------------------------------------------------
     #Creation of a new game of memory
@@ -43,7 +98,7 @@ class GamesService(Service):
         return game
     
     #-----------------------------------------------------------------------
-    #Creation of card deck and gridboard
+    #Private methods handling creation of card deck and gridboard
     #-----------------------------------------------------------------------
     
     def _make_carddeck(self):
@@ -94,6 +149,10 @@ class GamesService(Service):
         
         return True
     
+    #-----------------------------------------------------------------------
+    #Private methods handling validation of moves on the gridboard
+    #-----------------------------------------------------------------------
+  
     
     def _get_max_row_number(self, game):
         """Returns the maximum row number allowed for the gridboard"""
@@ -154,6 +213,10 @@ class GamesService(Service):
         
         return message
     
+    #-----------------------------------------------------------------------
+    #Private methods handling move making on the gridboard
+    #-----------------------------------------------------------------------
+    
     def _increment_score(self, game, first_user):
         """Increment the score for a particular user"""
         if first_user:
@@ -164,13 +227,16 @@ class GamesService(Service):
     def _assign_winner(self, game):
         """Check the scores and assign the winning user"""
         game.game_over = True
+
         if game.first_user_score > game.second_user_score:
             game.winner = game.first_user
             game.loser = game.second_user  
-        else: 
+        elif game.first_user_score < game.second_user_score: 
             game.winner = game.second_user
             game.loser = game.first_user
-         
+        
+        #otherwise it's a draw, winner remains None
+            
         
     def _make_first_guess(self, game, row, column):
         """Make a first guess on the gridboard at the specified row and column"""

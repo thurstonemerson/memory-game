@@ -27,7 +27,13 @@ class NewGameForm(messages.Message):
     """Used to create a new game"""
     first_user = messages.StringField(1, required=True)
     second_user = messages.StringField(2, required=True)
-
+    
+class ScoreForm(messages.Message):
+    """ScoreForm for outbound Score information"""
+    winner_score = messages.IntegerField(1, required=True)
+    loser_score = messages.IntegerField(2, required=True)
+    winner = messages.StringField(3, required=True)
+    loser = messages.StringField(4, required=True)
 
 class MakeMoveForm(messages.Message):
     """Used to make a move in an existing game"""

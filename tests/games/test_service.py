@@ -8,7 +8,7 @@ Uses a sqllite database so that the google app engine doesn't need to be running
 '''
 from tests import MemoryGameUnitTest
 
-from services import games
+from services import games, scores
 from users.models import User
 from games.models import CardNames, Card
 
@@ -17,13 +17,19 @@ import endpoints
 
 class GameTest(MemoryGameUnitTest):
         
-    def _get_new_game(self, name_one="good golly", name_two="my mummy"):
-        """Create a brand new game and return it"""
+        
+    def _get_two_players(self, name_one="good golly", name_two="my mummy"): 
         first_user = User(name=name_one, email=u'generic@thingy.com')
         first_user.put()
         
         second_user = User(name=name_two, email=u'generic@thingy.com')
-        second_user.put()
+        second_user.put()  
+        
+        return (first_user, second_user) 
+        
+    def _get_new_game(self, name_one="good golly", name_two="my mummy"):
+        """Create a brand new game and return it"""
+        first_user, second_user = self._get_two_players(name_one, name_two)
         
         #create a new game
         game = games.new_game(first_user.key, second_user.key)
@@ -206,6 +212,49 @@ class GameTest(MemoryGameUnitTest):
         self.assertEqual(game.winner, first_user.key)
         self.assertEqual(game.loser, second_user.key)
         
+    def test_draw(self): 
+        """Test that a draw results in no winner being assigned"""  
+        (game, first_user, second_user) = self._get_new_game_with_mock_gridboard()
+        
+        games.make_move(game, 0, 0, True) #DEATH
+        games.make_move(game, 0, 2, True)
+        self.assertFalse(game.game_over)  
+         
+        games.make_move(game, 0, 1, True) #FOOL
+        games.make_move(game, 2, 1, True)
+        self.assertFalse(game.game_over)  
+        
+        games.make_move(game, 0, 3, True) #HIGH_PRIESTESS
+        games.make_move(game, 1, 2, True)
+        self.assertFalse(game.game_over)  
+        
+        games.make_move(game, 1, 0, True) #HANGED_MAN
+        games.make_move(game, 3, 1, True)
+        self.assertFalse(game.game_over)  
+        
+        game.next_move = second_user.key
+        
+        games.make_move(game, 1, 1, False) #TEMPERANCE
+        games.make_move(game, 3, 2, False)
+        self.assertFalse(game.game_over)  
+        
+        games.make_move(game, 1, 3, False) #LOVERS
+        games.make_move(game, 2, 3, False)
+        self.assertFalse(game.game_over)  
+        
+        games.make_move(game, 2, 0, False) #JUSTICE
+        games.make_move(game, 3, 0, False)
+        
+        games.make_move(game, 3, 3, False) #HERMIT
+        games.make_move(game, 2, 2, False)
+        
+        #test game is ended when all pairs are found
+        self.assertTrue(game.game_over)  
+       
+        #test no winner or loser is assigned
+        self.assertIsNone(game.winner)
+        self.assertIsNone(game.loser)
+        
         
     def test_make_move_match_made(self):    
         """Test that a move can be played where the cards match"""  
@@ -271,7 +320,15 @@ class GameTest(MemoryGameUnitTest):
         self.assertFalse(game.board[0][0].flipped)
         self.assertFalse(game.board[0][1].flipped)
         
+    def create_score_service(self):    
         
+        player_one, player_two = self._get_two_players()
         
+        self.assertRaises(endpoints.BadRequestException, scores.create_new, player_one, player_two, 0, 0)
         
+        score = scores.create_new(winner=player_one, loser=player_two, first_player_score=3, second_player_score=2)
+        self.assertEquals(score.winner, player_one)
+        self.assertEquals(score.winner_score, 3)
+        self.assertEquals(score.loser, player_two)
+        self.assertEquals(score.loser_score, 2)
         

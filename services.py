@@ -7,6 +7,7 @@ Create the service instances required for interacting with the ndb.model classes
 '''
 
 from games import GamesService
+from games import ScoreService
 from users import UsersService
 
 
@@ -15,5 +16,8 @@ games = GamesService()
 
 #: An instance of the :class:`UsersService` class
 users = UsersService()
+
+#: An instance of the :class:`ScoreService` class
+scores = ScoreService()
 
 

@@ -14,7 +14,7 @@ from api import memory_api
 
 from forms import NewGameForm, GameForm, GameForms, MakeMoveForm, StringMessage
 
-from services import games, users 
+from services import games, users, scores 
 
 USER_REQUEST = endpoints.ResourceContainer(name=messages.StringField(1),
                                            email=messages.StringField(2))
@@ -87,10 +87,15 @@ class GameApi(remote.Service):
         # Make the move on the gridboard, change turn of user if necessary
         message = games.make_move(game, request.row, request.column, (user.key == game.first_user))
          
-        #if the game is over, assign a winner and loser 
+        #if the game is over, assign a winner and loser, add score to the scoreboard 
         if game.game_over:
-            users.add_win(game.winner.get())
-            users.add_loss(game.loser.get()) 
+            if game.winner:
+                users.add_win(game.winner.get())
+                users.add_loss(game.loser.get())
+                scores.new_score(game.winner, game.loser, game.first_user_score, game.second_user_score)
+            else: #we had a draw, cancel the game
+                games.delete(game)
+                raise endpoints.NotFoundException('You had a draw, begin again!')
          
         return games.to_form(game, message)
     
@@ -123,4 +128,17 @@ class GameApi(remote.Service):
             raise endpoints.BadRequestException('Game is already over!')
         else:
             raise endpoints.NotFoundException('Game not found!')
+
+
+#     @endpoints.method(request_message=USER_REQUEST,
+#                       response_message=ScoreForms,
+#                       path='scores/user/{user_name}',
+#                       name='get_user_scores',
+#                       http_method='GET')
+#     def get_user_scores(self, request):
+#         """Returns all of an individual User's scores"""
+#         user =  users.get_by_name(request.name)
+#         if not user:
+#         user_scores = games.get_user_scores(user)
+#         return ScoreForms(items=[score.to_form() for score in scores])
         

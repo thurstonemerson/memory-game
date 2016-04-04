@@ -23,11 +23,13 @@ class Game(ndb.Model):
     firstGuess = ndb.PickleProperty()
     secondGuess = ndb.PickleProperty()
     
-class Match(ndb.Model):
+class Score(ndb.Model):
     """Score object"""
     date = ndb.DateProperty(required=True)
     winner = ndb.KeyProperty(required=True)
     loser = ndb.KeyProperty(required=True)
+    winner_score = ndb.IntegerProperty(default=0)
+    loser_score = ndb.IntegerProperty(default=0)
 
 class CardNames(messages.Enum):
     """The names of the cards to be used in the memory game"""
