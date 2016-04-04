@@ -19,7 +19,6 @@ class GameForm(messages.Message):
     message = messages.StringField(8, required=True)
     winner = messages.StringField(9)
 
-
 class NewGameForm(messages.Message):
     """Used to create a new game"""
     first_user = messages.StringField(1, required=True)
@@ -31,4 +30,8 @@ class MakeMoveForm(messages.Message):
     name = messages.StringField(1, required=True)
     row = messages.IntegerField(2, required=True)
     column = messages.IntegerField(3, required=True)
+    
+class GameForms(messages.Message):
+    """Container for multiple GameForm"""
+    items = messages.MessageField(GameForm, 1, repeated=True)
     

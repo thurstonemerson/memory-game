@@ -12,10 +12,12 @@ import endpoints
 from protorpc import remote, messages
 from api import memory_api
 
-from forms import NewGameForm, GameForm, MakeMoveForm
+from forms import NewGameForm, GameForm, GameForms, MakeMoveForm
 
 from services import games, users 
 
+USER_REQUEST = endpoints.ResourceContainer(name=messages.StringField(1),
+                                           email=messages.StringField(2))
 NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
 GET_GAME_REQUEST = endpoints.ResourceContainer(
         urlsafe_game_key=messages.StringField(1),)
@@ -91,4 +93,17 @@ class GameApi(remote.Service):
             users.add_loss(game.loser.get()) 
          
         return games.to_form(game, message)
+    
+    @endpoints.method(request_message=USER_REQUEST,
+                      response_message=GameForms,
+                      path='user/games',
+                      name='get_user_games',
+                      http_method='GET')
+    def get_user_games(self, request):
+        """Return all User's active games"""
+        user =  users.get_by_name(request.name)
+        if not user:
+            raise endpoints.BadRequestException('User not found!')
+        user_games = games.get_user_games(user)
+        return GameForms(items=[games.to_form(game) for game in user_games])
         

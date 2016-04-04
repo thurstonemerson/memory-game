@@ -9,6 +9,7 @@ is contained. Persistence is dealt with in the service.
 from models import Game, CardNames, Card, Move
 from forms import GameForm
 from core import Service
+from google.appengine.ext import ndb
 import logging
 import math
 import random
@@ -16,7 +17,17 @@ import endpoints
 
 class GamesService(Service):
     __model__ = Game
-
+    
+    def get_user_games(self, user):
+        """Returns a list of active games by the requested user"""
+        games = Game.query(ndb.OR(Game.first_user == user.key,
+                                  Game.second_user == user.key)).filter(Game.game_over == False).fetch()
+        return games
+        
+    #-----------------------------------------------------------------------
+    #Creation of a new game of memory
+    #-----------------------------------------------------------------------
+   
     def new_game(self, first_user, second_user):
         """Creates and returns a new game, persisting to the google datastore"""
         deck = self._make_carddeck()
@@ -198,7 +209,7 @@ class GamesService(Service):
     #Initialising a form object to return to the user
     #-----------------------------------------------------------------------
     
-    def to_form(self, game, message):
+    def to_form(self, game, message=""):
         """Returns a GameForm representation of the Game"""
         form = GameForm(urlsafe_key=game.key.urlsafe(),
                         board = str(game.board),
@@ -211,17 +222,3 @@ class GamesService(Service):
         if game.winner:
             form.winner = game.winner.get().name
         return form
-
-#     def end_game(self, winner):
-#         """Ends the game"""
-#         self.winner = winner
-#         self.game_over = True
-#         self.put()
-#         loser = self.user_o if winner == self.user_x else self.user_x
-#         # Add the game to the score 'board'
-#         score = Score(date=date.today(), winner=winner, loser=loser)
-#         score.put()
-# 
-#         # Update the user models
-#         winner.get().add_win()
-#         loser.get().add_loss()

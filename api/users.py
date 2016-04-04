@@ -46,3 +46,4 @@ class UserApi(remote.Service):
         """Return all Users ranked by their win percentage"""
         user_rankings = users.get_user_rankings() 
         return UserForms(items=[users.to_form(user) for user in user_rankings])
+    

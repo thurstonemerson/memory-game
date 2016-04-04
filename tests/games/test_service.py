@@ -17,12 +17,12 @@ import endpoints
 
 class GameTest(MemoryGameUnitTest):
         
-    def _get_new_game(self):
+    def _get_new_game(self, name_one="good golly", name_two="my mummy"):
         """Create a brand new game and return it"""
-        first_user = User(name=u'good golly', email=u'generic@thingy.com')
+        first_user = User(name=name_one, email=u'generic@thingy.com')
         first_user.put()
         
-        second_user = User(name=u'my mummy', email=u'generic@thingy.com')
+        second_user = User(name=name_two, email=u'generic@thingy.com')
         second_user.put()
         
         #create a new game
@@ -81,7 +81,22 @@ class GameTest(MemoryGameUnitTest):
         self.assertRaises(endpoints.BadRequestException, games.get_by_urlsafe, "")
         self.assertRaises(ValueError, games.get_by_urlsafe, first_user.key.urlsafe())           
             
-            
+    def test_get_user_games(self):
+        """Test that active games of a user can be retrieved""" 
+        (game_one, first_user, second_user) = self._get_new_game("first user", "second user") 
+        game_one.game_over = True
+        game_one.put()
+        
+        #zero games returned because the user has no active games
+        self.assertEqual(len(games.get_user_games(first_user)), 0)
+        
+        #add an active game
+        games.new_game(first_user.key, second_user.key)
+        
+        #one game returned
+        self.assertEqual(len(games.get_user_games(first_user)), 1)
+          
+        
     def test_is_valid_move(self):  
         """Test that valid moves are allowed and invalid moves are not"""  
         (game, first_user, second_user) = self._get_new_game()
