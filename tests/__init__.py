@@ -22,6 +22,7 @@ class MemoryGameUnitTest(unittest.TestCase):
          
         # First, create an instance of the Testbed class.
         self.testbed = testbed.Testbed()
+        self.testbed.setup_env(current_version_id='testbed.version') 
         # Then activate the testbed, which prepares the service stubs for use.
         self.testbed.activate()
         # Next, declare which service stubs you want to use.

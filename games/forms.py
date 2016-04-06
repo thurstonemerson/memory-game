@@ -22,7 +22,7 @@ class GameForm(messages.Message):
     second_user_score = messages.IntegerField(7, required=True)
     message = messages.StringField(8, required=True)
     winner = messages.StringField(9)
-
+    
 class NewGameForm(messages.Message):
     """Used to create a new game"""
     first_user = messages.StringField(1, required=True)
