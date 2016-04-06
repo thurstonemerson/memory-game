@@ -332,3 +332,23 @@ class GameTest(MemoryGameUnitTest):
         self.assertEquals(score.loser, player_two)
         self.assertEquals(score.loser_score, 2)
         
+    def get_user_scores(self):    
+        
+        player_one, player_two = self._get_two_players()
+        score = scores.create_new(winner=player_one, loser=player_two, first_player_score=3, second_player_score=2)
+        
+        scores = scores.get_user_scores(user=player_one)
+        self.assertEqual(len(scores), 1)
+        self.assertEquals(scores[0].winner, player_one)
+        self.assertEquals(scores[0].winner_score, 3)
+        self.assertEquals(scores[0].loser, player_two)
+        self.assertEquals(scores[0].loser_score, 2)
+        
+        scores = scores.get_user_scores(user=player_two)
+        self.assertEqual(len(scores), 1)
+        self.assertEquals(scores[0].winner, player_one)
+        self.assertEquals(scores[0].winner_score, 3)
+        self.assertEquals(scores[0].loser, player_two)
+        self.assertEquals(scores[0].loser_score, 2)
+        
+        
