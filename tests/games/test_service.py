@@ -320,35 +320,35 @@ class GameTest(MemoryGameUnitTest):
         self.assertFalse(game.board[0][0].flipped)
         self.assertFalse(game.board[0][1].flipped)
         
-    def create_score_service(self):    
+    def test_create_score_service(self):    
         
         player_one, player_two = self._get_two_players()
         
-        self.assertRaises(endpoints.BadRequestException, scores.create_new, player_one, player_two, 0, 0)
+        self.assertRaises(endpoints.BadRequestException, scores.new_score, player_one, player_two, 0, 0)
         
-        score = scores.create_new(winner=player_one, loser=player_two, first_player_score=3, second_player_score=2)
-        self.assertEquals(score.winner, player_one)
+        score = scores.new_score(winner=player_one.key, loser=player_two.key, first_user_score=3, second_user_score=2)
+        self.assertEquals(score.winner, player_one.key)
         self.assertEquals(score.winner_score, 3)
-        self.assertEquals(score.loser, player_two)
+        self.assertEquals(score.loser, player_two.key)
         self.assertEquals(score.loser_score, 2)
         
-    def get_user_scores(self):    
+    def test_get_user_scores(self):    
         
         player_one, player_two = self._get_two_players()
-        score = scores.create_new(winner=player_one, loser=player_two, first_player_score=3, second_player_score=2)
+        scores.new_score(winner=player_one.key, loser=player_two.key, first_user_score=3, second_user_score=2)
         
-        scores = scores.get_user_scores(user=player_one)
-        self.assertEqual(len(scores), 1)
-        self.assertEquals(scores[0].winner, player_one)
-        self.assertEquals(scores[0].winner_score, 3)
-        self.assertEquals(scores[0].loser, player_two)
-        self.assertEquals(scores[0].loser_score, 2)
+        user_scores = scores.get_user_scores(user=player_one)
+        self.assertEqual(len(user_scores), 1)
+        self.assertEquals(user_scores[0].winner, player_one.key)
+        self.assertEquals(user_scores[0].winner_score, 3)
+        self.assertEquals(user_scores[0].loser, player_two.key)
+        self.assertEquals(user_scores[0].loser_score, 2)
         
-        scores = scores.get_user_scores(user=player_two)
-        self.assertEqual(len(scores), 1)
-        self.assertEquals(scores[0].winner, player_one)
-        self.assertEquals(scores[0].winner_score, 3)
-        self.assertEquals(scores[0].loser, player_two)
-        self.assertEquals(scores[0].loser_score, 2)
+        user_scores = scores.get_user_scores(user=player_two)
+        self.assertEqual(len(user_scores), 1)
+        self.assertEquals(user_scores[0].winner, player_one.key)
+        self.assertEquals(user_scores[0].winner_score, 3)
+        self.assertEquals(user_scores[0].loser, player_two.key)
+        self.assertEquals(user_scores[0].loser_score, 2)
         
         

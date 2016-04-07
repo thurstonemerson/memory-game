@@ -46,9 +46,9 @@ class ScoreService(Service):
     
     def get_user_scores(self, user):
         """Returns a list of scores by the requested user"""
-        games = Score.query(ndb.OR(Score.winner == user.key,
+        scores = Score.query(ndb.OR(Score.winner == user.key,
                                     Score.loser == user.key)).fetch()
-        return games
+        return scores
     
     #-----------------------------------------------------------------------
     #Create a form from a score
