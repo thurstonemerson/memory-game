@@ -1,4 +1,4 @@
-#Memory Game API for google app engine
+#Memory Game API for Google App Engine
 
 ## Set-Up Instructions:
 1.  Update the value of application in app.yaml to the app ID you have registered
@@ -10,7 +10,28 @@
  
  
 ##Game Description:
-.
+
+Which player has the better memory? In this simple 2 player game of memory beloved by children the world round,
+you flip two cards and remember the pictures on them. If you don't get a match then it is the next player's turn.
+If you get a match, then you can flip two more cards! Whoever collects more pairs is the winner. 
+
+Each board contains a pair of cards from the 8 possible card types:
+DEATH,TEMPERANCE,HIGH_PRIESTESS,HERMIT,HANGED_MAN,LOVERS,JUSTICE,FOOL
+
+The board is represented as a 2D list of cards with XXX indicating an unflipped
+card and the card name indicating a flipped card:
+[[XXX, XXX, XXX, XXX], 
+[XXX, HANGED_MAN, XXX, XXX], 
+[XXX, XXX, XXX, XXX], 
+[XXX, XXX, XXX, HERMIT]
+
+For API testing purposes, a board may be represented as a 2D list of cards and
+a boolean value indicating whether or not the card has been flipped:
+[[FOOL:False, TEMPERANCE:False, LOVERS:False, HANGED_MAN:False], 
+[TEMPERANCE:False, HANGED_MAN:False, JUSTICE:False, DEATH:False], 
+[HERMIT:False, DEATH:False, JUSTICE:False, HIGH_PRIESTESS:False], 
+[FOOL:False, HIGH_PRIESTESS:False, LOVERS:False, HERMIT:False]]
+
 
 ##Endpoints Included:
  - **create_user**
