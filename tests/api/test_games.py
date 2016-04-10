@@ -12,7 +12,7 @@ import endpoints
 from datetime import date
 from users.models import User
 from games.models import Card, CardNames, Score
-from services import games
+from services import games, scores
 from api.games import GameApi
 from tests import MemoryGameUnitTest
 
@@ -333,4 +333,38 @@ class GameApiTest(MemoryGameUnitTest):
         testapp.post_json(api_call, request)
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":second_user.name,  "row":2, "column":2} 
         self.assertRaises(Exception, testapp.post_json, api_call, request)
+    
+    def test_get_user_scores(self):
+        """Functional test for api call to retrieve user scores"""
+        #create the api 
+        api_call = '/_ah/spi/GameApi.get_user_scores'
+        app = endpoints.api_server([GameApi], restricted=False)
+        testapp = webtest.TestApp(app)
         
+        #create some scores
+        player_one, player_two = self._get_two_players()
+        scores.new_score(winner=player_one.key, loser=player_two.key, first_user_score=3, second_user_score=2)
+        
+        #test user not found
+        request = {"name":"asdfsdf"} 
+        self.assertRaises(Exception, testapp.post_json, api_call, request)
+       
+        #test scores retrieved
+        request = {"name":player_one.name} 
+        resp = testapp.post_json(api_call, request)
+        
+        self.assertEqual(len(resp.json['items']), 1)
+        self.assertEquals(resp.json['items'][0]['winner'], player_one.name)
+        self.assertEquals(resp.json['items'][0]['winner_score'], "3")
+        self.assertEquals(resp.json['items'][0]['loser'], player_two.name)
+        self.assertEquals(resp.json['items'][0]['loser_score'], "2")
+        
+        request = {"name":player_two.name} 
+        resp = testapp.post_json(api_call, request)
+        
+        self.assertEqual(len(resp.json['items']), 1)
+        self.assertEquals(resp.json['items'][0]['winner'], player_one.name)
+        self.assertEquals(resp.json['items'][0]['winner_score'], "3")
+        self.assertEquals(resp.json['items'][0]['loser'], player_two.name)
+        self.assertEquals(resp.json['items'][0]['loser_score'], "2")
+      

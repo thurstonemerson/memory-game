@@ -30,10 +30,15 @@ class NewGameForm(messages.Message):
     
 class ScoreForm(messages.Message):
     """ScoreForm for outbound Score information"""
-    winner_score = messages.IntegerField(1, required=True)
-    loser_score = messages.IntegerField(2, required=True)
-    winner = messages.StringField(3, required=True)
-    loser = messages.StringField(4, required=True)
+    date = messages.StringField(1, required=True)
+    winner = messages.StringField(2, required=True)
+    loser = messages.StringField(3, required=True)
+    winner_score = messages.IntegerField(4, required=True)
+    loser_score = messages.IntegerField(5, required=True)
+    
+class ScoreForms(messages.Message):
+    """Return multiple ScoreForms"""
+    items = messages.MessageField(ScoreForm, 1, repeated=True)
 
 class MakeMoveForm(messages.Message):
     """Used to make a move in an existing game"""

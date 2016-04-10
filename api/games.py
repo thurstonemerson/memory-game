@@ -12,7 +12,7 @@ import endpoints
 from protorpc import remote, messages
 from api import memory_api
 
-from forms import NewGameForm, GameForm, GameForms, MakeMoveForm, StringMessage
+from forms import NewGameForm, GameForm, GameForms, MakeMoveForm, StringMessage, ScoreForms
 
 from services import games, users, scores 
 
@@ -130,15 +130,17 @@ class GameApi(remote.Service):
             raise endpoints.NotFoundException('Game not found!')
 
 
-#     @endpoints.method(request_message=USER_REQUEST,
-#                       response_message=ScoreForms,
-#                       path='scores/user/{user_name}',
-#                       name='get_user_scores',
-#                       http_method='GET')
-#     def get_user_scores(self, request):
-#         """Returns all of an individual User's scores"""
-#         user =  users.get_by_name(request.name)
-#         if not user:
-#         user_scores = games.get_user_scores(user)
-#         return ScoreForms(items=[score.to_form() for score in scores])
+    @endpoints.method(request_message=USER_REQUEST,
+                      response_message=ScoreForms,
+                      path='scores/user/{name}',
+                      name='get_user_scores',
+                      http_method='GET')
+    def get_user_scores(self, request):
+        """Returns all of an individual User's scores"""
+        user =  users.get_by_name(request.name)
+        if not user:
+            raise endpoints.NotFoundException(
+                    'A User with that name does not exist!')
+        user_scores = scores.get_user_scores(user)
+        return ScoreForms(items=[scores.to_form(score) for score in user_scores])
         
