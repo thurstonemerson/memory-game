@@ -13,7 +13,8 @@ class User(ndb.Model):
     email =ndb.StringProperty()
     wins = ndb.IntegerProperty(default=0)
     total_played = ndb.IntegerProperty(default=0)
-    
+    #win_percentage = ndb.ComputedProperty(lambda self: float(self.wins)/float(self.total_played) if self.total_played > 0 else 0)
+     
     @property
     def win_percentage(self):
         if self.total_played > 0:

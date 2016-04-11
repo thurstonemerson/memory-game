@@ -40,7 +40,7 @@ class GameApi(remote.Service):
         """Creates a new game of memory for two users"""
         first_user = users.get_by_name(request.first_user)
         second_user = users.get_by_name(request.second_user)
-        if not first_user and second_user:
+        if not first_user or not second_user:
             raise endpoints.NotFoundException(
                     'One of users with that name does not exist!')
         if first_user.key == second_user.key:

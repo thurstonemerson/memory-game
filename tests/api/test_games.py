@@ -68,14 +68,12 @@ class GameApiTest(MemoryGameUnitTest):
         self.assertEqual(resp.json['second_user_score'], "0")
         
         #test user not found
-        #request = {"first_user":"", "second_user":""} 
-        #self.assertRaises(endpoints.NotFoundException, testapp.post_json, api_call, request)
+        request = {"first_user":"", "second_user":""} 
+        self.assertRaises(Exception, testapp.post_json, api_call, request)
         
         #test calling new game with the same user twice
-        #request = {"first_user":first_user.name, "second_user":first_user.name} 
-        #self.assertRaises(endpoints.BadRequestException, testapp.post_json, api_call, request)
-        
-        
+        request = {"first_user":first_user.name, "second_user":first_user.name} 
+        self.assertRaises(Exception, testapp.post_json, api_call, request)
         
     def test_get_game(self):
         """Functional test for api call to get an existing game"""
@@ -191,72 +189,72 @@ class GameApiTest(MemoryGameUnitTest):
         api_call = '/_ah/spi/GameApi.make_move'
         app = endpoints.api_server([GameApi], restricted=False)
         testapp = webtest.TestApp(app)
-        
+     
         #create a new game with a mock gridboard
         (game, first_user, second_user) = self._get_new_game_with_mock_gridboard()
-       
+         
         #DEATH
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":0, "column":0} 
         testapp.post_json(api_call, request)
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":0, "column":2} 
         testapp.post_json(api_call, request)
         self.assertFalse(game.game_over)
-          
+            
         #FOOL
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":0, "column":1} 
         testapp.post_json(api_call, request)
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":2, "column":1} 
         testapp.post_json(api_call, request)
         self.assertFalse(game.game_over)
-        
+          
         #HIGH_PRIESTESS
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":0, "column":3} 
         testapp.post_json(api_call, request)
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":1, "column":2} 
         testapp.post_json(api_call, request)
         self.assertFalse(game.game_over) 
-        
+          
         #HANGED_MAN
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":1, "column":0} 
         testapp.post_json(api_call, request)
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":3, "column":1} 
         testapp.post_json(api_call, request)
         self.assertFalse(game.game_over) 
-        
+          
         #TEMPERANCE
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":1, "column":1} 
         testapp.post_json(api_call, request)
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":3, "column":2} 
         testapp.post_json(api_call, request)
         self.assertFalse(game.game_over)   
-        
+          
         #LOVERS
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":1, "column":3} 
         testapp.post_json(api_call, request)
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":2, "column":3} 
         testapp.post_json(api_call, request)
         self.assertFalse(game.game_over)   
-        
+          
         #JUSTICE
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":2, "column":0} 
         testapp.post_json(api_call, request)
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":3, "column":0} 
         testapp.post_json(api_call, request)
         self.assertFalse(game.game_over)
-        
+          
         #HERMIT
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":3, "column":3} 
         testapp.post_json(api_call, request)
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":2, "column":2} 
         testapp.post_json(api_call, request)
-        
+          
         #test game is ended when all pairs are found
         self.assertTrue(game.game_over)  
-       
+         
         #test correct winner and loser are assigned
         self.assertEqual(game.winner, first_user.key)
         self.assertEqual(game.loser, second_user.key)
-        
+          
         #test a score is added to the scoreboard
         score = Score.query(Score.winner == first_user.key).get()
         self.assertEqual(score.winner, first_user.key)
