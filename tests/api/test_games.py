@@ -73,7 +73,7 @@ class GameApiTest(MemoryGameUnitTest):
         
         #test calling new game with the same user twice
         #request = {"first_user":first_user.name, "second_user":first_user.name} 
-        #self.assertRaises(endpoints.NotFoundException, testapp.post_json, api_call, request)
+        #self.assertRaises(endpoints.BadRequestException, testapp.post_json, api_call, request)
         
         
         

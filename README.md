@@ -32,6 +32,8 @@ a boolean value indicating whether or not the card has been flipped:
 [HERMIT:False, DEATH:False, JUSTICE:False, HIGH_PRIESTESS:False], 
 [FOOL:False, HIGH_PRIESTESS:False, LOVERS:False, HERMIT:False]]
 
+To make a move, row and column values must be represented in array index values,
+ie each index begins at 0 not 1.
 
 ##Endpoints Included:
  - **create_user**
@@ -45,27 +47,39 @@ a boolean value indicating whether or not the card has been flipped:
  - **new_game**
     - Path: 'game'
     - Method: POST
-    - Parameters: user_name, min, max, attempts
+    - Parameters: first_user, second_user
     - Returns: GameForm with initial game state.
-    - Description: Creates a new Game. user_name provided must correspond to an
-    existing user - will raise a NotFoundException if not. Min must be less than
-    max. Also adds a task to a task queue to update the average moves remaining
-    for active games.
+    - Description: Creates a new Game. `first_user` and `second_user` are the names of the
+    of the two players, first_user will be the first player to take a turn in the game.
+    Will raise a NotFoundException if either user does not exist. Will raise a BadRequestException
+    if the player names are the same.
      
  - **get_game**
     - Path: 'game/{urlsafe_game_key}'
     - Method: GET
     - Parameters: urlsafe_game_key
     - Returns: GameForm with current game state.
-    - Description: Returns the current state of a game.
+    - Description: Will raise a NotFoundException if game does not exist.
+    Returns the current state of a game. 
     
  - **make_move**
     - Path: 'game/{urlsafe_game_key}'
     - Method: PUT
-    - Parameters: urlsafe_game_key, guess
+    - Parameters: urlsafe_game_key, user_name, row, column
     - Returns: GameForm with new game state.
-    - Description: Accepts a 'guess' and returns the updated state of the game.
-    If this causes a game to end, a corresponding Score entity will be created.
+    - Description: Will raise a NotFoundException if game does not exist.
+    Will raise a BadRequestException if game is already over.
+    Will raise a BadRequestException if the wrong user attempts to take a turn.
+    Will raise a BadRequestException if a move attempted to moved outside the gridboard 
+    or flips an already flipped card.
+    Accepts a move and returns the updated state of the game.
+    Row and column represent a request to flip a card on the game board at indexes between 0 and 3.
+    For a users first guess, the card is flipped and a message is returned informing the user
+    they have one more guess to make. For a users second guess, if a match is made the user is
+    informed and the user's game score is incremented by one. If a match is not made, the user is
+    informed and the next turn will be the other user. 
+    If a match is made and this causes a game to end, a corresponding Score entity will be created,
+    unless the game is tied, in which case the game will be deleted.
     
  - **get_scores**
     - Path: 'scores'

@@ -44,7 +44,7 @@ class GameApi(remote.Service):
             raise endpoints.NotFoundException(
                     'One of users with that name does not exist!')
         if first_user.key == second_user.key:
-            raise endpoints.NotFoundException(
+            raise endpoints.BadRequestException(
                     'Please select two different users to play this game!')
 
         game = games.new_game(first_user.key, second_user.key)
@@ -75,7 +75,7 @@ class GameApi(remote.Service):
         if not game:
             raise endpoints.NotFoundException('Game not found')
         if game.game_over:
-            raise endpoints.NotFoundException('Game already over')
+            raise endpoints.BadRequestException('Game already over')
  
         user = users.get_by_name(request.name)
         if user.key != game.next_move:
