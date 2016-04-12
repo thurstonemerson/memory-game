@@ -6,7 +6,7 @@ is contained. Persistence is dealt with in the service.
 
 @author: thurstonemerson
 '''
-from models import Game, CardNames, Card, Move, Score
+from models import Game, CardNames, Card, Move, Score, Turn
 from forms import GameForm, ScoreForm
 from core import Service
 from google.appengine.ext import ndb
@@ -32,7 +32,7 @@ class ScoreService(Service):
          
         #create a new score and initialise with winner/loser deatils
         score = super(ScoreService, self).new()
-        data = {"date": date.today(), "winner": winner, "loser": loser, 
+        data = {"date": date.today(), "winner": winner, "loser": loser,
                "winner_score": first_user_score if first_user_score > second_user_score else second_user_score, 
                "loser_score": first_user_score if first_user_score < second_user_score else second_user_score}
          
@@ -90,7 +90,7 @@ class GamesService(Service):
         #create a new game model and initialise with user details, gridboard
         game = super(GamesService, self).new()
         data = {"first_user": first_user, "second_user": second_user, 
-               "board": self._make_gridboard(deck), 
+               "board": self._make_gridboard(deck), "history":[],
                "unmatched_pairs": len(CardNames), "next_move": first_user}
          
         super(GamesService, self).update(game, **data)
@@ -198,6 +198,9 @@ class GamesService(Service):
                 self._increment_score(game, first_user)
                 #decrement the number of card pairs left to find
                 game.unmatched_pairs-=1
+                #add the turn to the game history, and clear the cached guesses
+                self._add_history(game, first_user, match_made=True)
+                game.firstGuess = game.secondGuess = None                
                 #Check to see if the game has been completed
                 if game.unmatched_pairs == 0:
                     #check who has the highest score and assign a winner
@@ -207,7 +210,10 @@ class GamesService(Service):
                     message = "You made a match"
             else: #We didn't make a match, so it is the other players turn
                 game.next_move = game.second_user if first_user else game.first_user
+                #add the turn to the game history
+                self._add_history(game, first_user, match_made=False)  
                 message = "Not a match"
+            
         
         super(GamesService, self).save(game)
         
@@ -216,6 +222,15 @@ class GamesService(Service):
     #-----------------------------------------------------------------------
     #Private methods handling move making on the gridboard
     #-----------------------------------------------------------------------
+    
+    def _add_history(self, game, first_user, match_made):
+        """When both guesses have been made, add a turn to the game history"""
+        current_user = game.first_user if first_user else game.second_user
+        turn = Turn(user=current_user.get().name, 
+                    first_guess=str(game.firstGuess), 
+                    second_guess=str(game.secondGuess), 
+                    match_made=match_made)
+        game.history.append(turn)
     
     def _increment_score(self, game, first_user):
         """Increment the score for a particular user"""
@@ -254,13 +269,12 @@ class GamesService(Service):
         """Make a second guess on the gridboard at the specified row and column
         Return true if the second guess was a match"""
         logging.info("First guess: {0}, Second guess : {1}".format(game.firstGuess, game.firstGuess))
+        game.secondGuess = Move(game.board[row][column], row, column)
         
         #If the first guess matches the selected tile, we have a match
         if game.firstGuess.card.card_name == game.board[row][column].card_name:
-                game.firstGuess = game.secondGuess = None
                 return True
         
-        game.secondGuess = Move(game.board[row][column], row, column)
         return False
     
     
@@ -282,6 +296,7 @@ class GamesService(Service):
                         next_move=game.next_move.get().name,
                         game_over=game.game_over,
                         message=message,
+                        history=str(game.history),
                         first_user_score=game.first_user_score,
                         second_user_score=game.second_user_score,
                         unmatched_pairs=game.unmatched_pairs)

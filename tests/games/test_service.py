@@ -57,6 +57,7 @@ class GameTest(MemoryGameUnitTest):
         self.assertEqual(game.second_user_score, 0)
         self.assertEqual(game.unmatched_pairs, len(CardNames))
         self.assertEqual(game.next_move, first_user.key)
+        self.assertEqual(game.history, [])
         self.assertFalse(game.game_over)
         self.assertIsNone(game.winner)
         self.assertIsNone(game.loser)
@@ -157,6 +158,7 @@ class GameTest(MemoryGameUnitTest):
         self.assertEqual(game.second_user_score, game_form.second_user_score)
         self.assertEqual(message, game_form.message)
         self.assertEqual(game.winner, game_form.winner)
+        self.assertEqual("[]", game_form.history)
         
         #test winner if true
         game.winner = first_user.key
@@ -274,6 +276,13 @@ class GameTest(MemoryGameUnitTest):
         self.assertEqual(message, "You made a match")  
         self.assertTrue(game.board[0][2].flipped)
         
+        #test the game history
+        turn = game.history.pop()
+        self.assertEqual(turn.user, first_user.name) 
+        self.assertEqual(turn.match_made, True)
+        self.assertEqual(turn.first_guess, "DEATH:0:0")  
+        self.assertEqual(turn.second_guess, "DEATH:0:2")  
+        
         #test turn is not rotated when a match is made
         self.assertEqual(game.next_move, first_user.key)
         
@@ -307,6 +316,13 @@ class GameTest(MemoryGameUnitTest):
         message = games.make_move(game, 0, 1, True)  
         self.assertEqual(message, "Not a match")  
         self.assertTrue(game.board[0][1].flipped)
+        
+        #test the game history
+        turn = game.history.pop()
+        self.assertEqual(turn.user, first_user.name) 
+        self.assertEqual(turn.match_made, False)
+        self.assertEqual(turn.first_guess, "DEATH:0:0")  
+        self.assertEqual(turn.second_guess, "FOOL:0:1")  
         
         #test turn is rotated when a match isn't made
         self.assertEqual(game.next_move, second_user.key)

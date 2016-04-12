@@ -66,6 +66,7 @@ class GameApiTest(MemoryGameUnitTest):
         self.assertEqual(resp.json['unmatched_pairs'], "8")
         self.assertEqual(resp.json['first_user_score'], "0")
         self.assertEqual(resp.json['second_user_score'], "0")
+        self.assertEqual(resp.json['history'], "[]")
         
         #test user not found
         request = {"first_user":"", "second_user":""} 
@@ -95,6 +96,7 @@ class GameApiTest(MemoryGameUnitTest):
         self.assertEqual(resp.json['unmatched_pairs'], "8")
         self.assertEqual(resp.json['first_user_score'], "0")
         self.assertEqual(resp.json['second_user_score'], "0")
+        self.assertEqual(resp.json['history'], "[]")
         
         
     def test_make_move_no_match(self):
@@ -121,7 +123,41 @@ class GameApiTest(MemoryGameUnitTest):
         resp = testapp.post_json(api_call, request)
         self.assertEqual(resp.json['message'], "Not a match")  
         self.assertTrue(game.board[0][1].flipped)
+        self.assertTrue(resp.json['history'], "[good golly:DEATH:0:0:FOOL:0:1:False]")
+    
+    def test_make_move_made_match(self):
+        """Functional test for api call to make a move"""
+        #create the api 
+        api_call = '/_ah/spi/GameApi.make_move'
+        app = endpoints.api_server([GameApi], restricted=False)
+        testapp = webtest.TestApp(app)
         
+        #create a new game with a mock gridboard
+        (game, first_user, second_user) = self._get_new_game_with_mock_gridboard()
+          
+        #make the first move, flip DEATH. Test first guess made.  
+        #the expected request object as a dictionary, to be serialised to JSON by webtest
+        request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":0, "column":0} 
+        resp = testapp.post_json(api_call, request)
+        self.assertEqual(resp.json['message'], "One more guess to make")
+          
+        #test card is flipped
+        self.assertTrue(game.board[0][0].flipped)
+        
+        #make the second move, flip DEATH. Test match is made.
+        request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":0, "column":2} 
+        resp = testapp.post_json(api_call, request)
+        self.assertEqual(resp.json['message'], "You made a match")  
+        self.assertTrue(game.board[0][2].flipped)
+        self.assertTrue(resp.json['history'], "[good golly:DEATH:0:0:DEATH:0:2:True]")    
+        
+        #test game history with two moves
+        request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":3, "column":3} 
+        resp = testapp.post_json(api_call, request)
+        request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":3, "column":2} 
+        resp = testapp.post_json(api_call, request)
+        self.assertEqual(resp.json['history'], "[good golly:DEATH:0:0:DEATH:0:2:True, good golly:HERMIT:3:3:TEMPERANCE:3:2:False]")  
+      
         
     def test_make_move_game_not_found(self):
         """Functional test for api call to make a move"""

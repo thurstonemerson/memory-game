@@ -23,6 +23,7 @@ class Game(ndb.Model):
     loser = ndb.KeyProperty()
     firstGuess = ndb.PickleProperty()
     secondGuess = ndb.PickleProperty()
+    history = ndb.PickleProperty(required=True)
     
 class Score(ndb.Model):
     """Score object"""
@@ -42,7 +43,21 @@ class CardNames(messages.Enum):
     LOVERS = 6
     JUSTICE = 7
     FOOL = 8
-    
+
+class Turn():
+    """"A user's turn in the game of memory"""
+    def __init__(self, user, first_guess, second_guess, match_made):
+        self.user = user
+        self.first_guess = first_guess
+        self.second_guess = second_guess
+        self.match_made = match_made
+        
+    def __repr__(self):
+        return "{0}:{1}:{2}:{3}".format(self.user, self.first_guess, self.second_guess, self.match_made)    
+       
+    def __str__(self):
+        return "{0}:{1}:{2}:{3}".format(self.user, self.first_guess, self.second_guess, self.match_made)    
+         
 class Move():
     """"A single move in the game of memory"""
     def __init__(self, card, row, column):
