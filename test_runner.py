@@ -6,10 +6,8 @@ Run all functional and unit tests in the testing suite
 '''
 import unittest
 import sys
- 
-SDK_PATH = "C:\Program Files (x86)\Google\google_appengine"
-TEST_PATH = "."
- 
+from config import SDK_PATH, TEST_PATH
+
  
 def run_tests(sdk_path, test_path):
     sys.path.insert(0, sdk_path)

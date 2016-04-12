@@ -7,6 +7,7 @@ Created on 18/03/2016
 
 from protorpc import messages
 from google.appengine.ext import ndb
+from config import DEBUG
 
 class Game(ndb.Model):
     """Game object"""
@@ -68,9 +69,15 @@ class Card():
         self.flipped = not self.flipped
     
     def __repr__(self):
-        return "{0}:{1}".format(self.card_name.name, self.flipped)    
-       
+        if DEBUG:
+            return "{0}:{1}".format(self.card_name.name, self.flipped)
+        else:    
+            return "{0}".format(self.card_name if self.flipped else "XXX")
+        
     def __str__(self):
-        return "{0}:{1}".format(self.card_name.name, self.flipped)   
+        if DEBUG:
+            return "{0}:{1}".format(self.card_name.name, self.flipped)
+        else:    
+            return "{0}".format(self.card_name if self.flipped else "XXX")
     
 
