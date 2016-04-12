@@ -8,6 +8,14 @@
 1.  (Optional) Generate your client library(ies) with the endpoints tool.
  Deploy your application.
  
+##Testing:
+
+A suite of functional API tests and unit tests are included in the source. To run them, alter the
+SDK_PATH in the test_runner.py file and insert the path to the google app engine sdk. Tests 
+can be launched with the following command:
+
+	python test_runner.py
+ 
  
 ##Game Description:
 
