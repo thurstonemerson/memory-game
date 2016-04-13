@@ -143,4 +143,16 @@ class GameApi(remote.Service):
                     'A User with that name does not exist!')
         user_scores = scores.get_user_scores(user)
         return ScoreForms(items=[scores.to_form(score) for score in user_scores])
+    
+    @endpoints.method(request_message=GET_GAME_REQUEST,
+                      response_message=StringMessage,
+                      path='game/{urlsafe_game_key}/history',
+                      name='get_game_history',
+                      http_method='GET')
+    def get_game_history(self, request):
+        """Return a Game's move history"""
+        game = games.get_by_urlsafe(request.urlsafe_game_key)
+        if not game:
+            raise endpoints.NotFoundException('Game not found')
+        return StringMessage(message=str(game.history))
         
