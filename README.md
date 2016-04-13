@@ -11,8 +11,7 @@
 ##Testing:
 
 A suite of functional API tests and unit tests are included in the source. To run them, alter the
-SDK_PATH in the config.py file and insert the path to the google app engine sdk. 
-In the file tests/config.yaml, change the variable datastore_file to a file name 
+SDK_PATH in the config.py file and insert the path to the google app engine sdk. Tests
 can be launched with the following command:
 
 	python test_runner.py
@@ -56,6 +55,14 @@ ie each index begins at 0 not 1.
     - Description: Creates a new User. user_name provided must be unique. Will 
     raise a ConflictException if a User with that user_name already exists.
     
+ - **get_user_rankings**
+    - Path: 'user/ranking'
+    - Method: GET
+    - Parameters: None
+    - Returns: UserForms
+    - Description: Rank all players that have played at least one game by their
+    winning percentage and return.
+    
  - **new_game**
     - Path: 'game'
     - Method: POST
@@ -93,51 +100,70 @@ ie each index begins at 0 not 1.
     If a match is made and this causes a game to end, a corresponding Score entity will be created,
     unless the game is tied, in which case the game will be deleted.
     
- - **get_scores**
-    - Path: 'scores'
-    - Method: GET
-    - Parameters: None
-    - Returns: ScoreForms.
-    - Description: Returns all Scores in the database (unordered).
-    
  - **get_user_scores**
-    - Path: 'scores/user/{user_name}'
+    - Path: 'scores/user/{name}'
     - Method: GET
-    - Parameters: user_name
+    - Parameters: name
     - Returns: ScoreForms. 
     - Description: Returns all Scores recorded by the provided player (unordered).
     Will raise a NotFoundException if the User does not exist.
     
- - **get_active_game_count**
-    - Path: 'games/active'
+ - **get_user_games**
+    - Path: 'user/games'
     - Method: GET
-    - Parameters: None
-    - Returns: StringMessage
-    - Description: Gets the average number of attempts remaining for all games
-    from a previously cached memcache key.
+    - Parameters: name
+    - Returns: ScoreForms. 
+    - Description: Returns all active games recorded by the provided player (unordered).
+    Will raise a NotFoundException if the User does not exist.
+    
+  - **cancel_game**
+    - Path: 'game/{urlsafe_game_key}'
+    - Method: DELETE
+    - Parameters: urlsafe_game_key
+    - Returns: StringMessage confirming deletion
+    - Description: Deletes the game. If the game is already completed a BadRequestException
+    will be thrown. Will raise a NotFoundException if the game does not exist.
+    
+  - **get_game_history**
+    - Path: 'game/{urlsafe_game_key}'
+    - Method: GET
+    - Parameters: urlsafe_game_key
+    - Returns: StringMessage containing history
+    - Description: Returns the move history of a game as a stringified list in the form 
+    [user, first_guess, second_guess, match_made] where each guess is represented by a
+    card name, row number, and columne number:
+    eg. [patrick:FOOL:0:0:HANGED_MAN:1:0:False, timothy:JUSTICE:2:0:LOVERS:2:2:False]
 
 ##Models Included:
  - **User**
     - Stores unique user_name and (optional) email address.
+    - Also keeps track of wins and total_played.
     
  - **Game**
-    - Stores unique game states. Associated with User model via KeyProperty.
+    - Stores unique game states. Associated with User models via KeyProperties
+    first_user and second_user.
     
  - **Score**
-    - Records completed games. Associated with Users model via KeyProperty.
+    - Records completed games. Associated with Users model via KeyProperty as
+    well.
     
 ##Forms Included:
  - **GameForm**
-    - Representation of a Game's state (urlsafe_key, attempts_remaining,
-    game_over flag, message, user_name).
+    - Representation of a Game's state (urlsafe_key, board,
+    user_x, user_o, game_over, winner, next_move, unmatched_pairs, first_user_score, 
+    second_user_score, history).   
  - **NewGameForm**
-    - Used to create a new game (user_name, min, max, attempts)
+    - Used to create a new game (first_user, second_user)
  - **MakeMoveForm**
-    - Inbound make move form (guess).
+    - Inbound make move form (name, row, column).
  - **ScoreForm**
-    - Representation of a completed game's Score (user_name, date, won flag,
-    guesses).
+    - Representation of a completed game's Score (date, winner, loser, winner_score, loser_score).
  - **ScoreForms**
     - Multiple ScoreForm container.
+ - **UserForm**
+    - Representation of User. Includes winning percentage
+ - **UserForms**
+    - Container for one or more UserForm.
  - **StringMessage**
     - General purpose String container.
+    
