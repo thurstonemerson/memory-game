@@ -1,4 +1,0 @@
-nosegae_datastore_v3: True
-nosegae_datastore_v3_kwargs:
-  datastore_file: c:/temp/nosegae.sqlite3
-  use_sqlite: True

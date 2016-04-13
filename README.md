@@ -11,7 +11,8 @@
 ##Testing:
 
 A suite of functional API tests and unit tests are included in the source. To run them, alter the
-SDK_PATH in the config.py file and insert the path to the google app engine sdk. Tests 
+SDK_PATH in the config.py file and insert the path to the google app engine sdk. 
+In the file tests/config.yaml, change the variable datastore_file to a file name 
 can be launched with the following command:
 
 	python test_runner.py
@@ -39,6 +40,9 @@ a boolean value indicating whether or not the card has been flipped:
 [TEMPERANCE:False, HANGED_MAN:False, JUSTICE:False, DEATH:False], 
 [HERMIT:False, DEATH:False, JUSTICE:False, HIGH_PRIESTESS:False], 
 [FOOL:False, HIGH_PRIESTESS:False, LOVERS:False, HERMIT:False]]
+
+To see the 2D list of cards with boolean value, change the DEBUG setting in the
+config.py file to True.
 
 To make a move, row and column values must be represented in array index values,
 ie each index begins at 0 not 1.

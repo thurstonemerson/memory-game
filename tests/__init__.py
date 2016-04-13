@@ -15,11 +15,6 @@ class MemoryGameUnitTest(unittest.TestCase):
     
     def setUp(self):
         """Set up the test bed and activate it"""
-        #first load the configuration file
-        script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-        abs_file_path = os.path.join(script_dir, "config.yaml")
-        yaml.safe_load(open(abs_file_path))
-         
         # First, create an instance of the Testbed class.
         self.testbed = testbed.Testbed()
         self.testbed.setup_env(current_version_id='testbed.version') 
