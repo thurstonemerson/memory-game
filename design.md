@@ -35,4 +35,6 @@ game board.
 - I added a complete suite of functional api tests and unit tests for the game and user code.
 I found this essential in testing whether additions to the code had broken anything in the game
 logic once it started becoming more complicated.
+
+- I added a push task to email the other user when one user has completed their turn.
    

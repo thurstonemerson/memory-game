@@ -10,6 +10,7 @@ Game logic and persistence is manipulated in the games service module.
 
 import endpoints
 from protorpc import remote, messages
+
 from api import memory_api
 
 from forms import NewGameForm, GameForm, GameForms, MakeMoveForm, StringMessage, ScoreForms
@@ -96,7 +97,7 @@ class GameApi(remote.Service):
             else: #we had a draw, cancel the game
                 games.delete(game)
                 raise endpoints.NotFoundException('You had a draw, begin again!')
-         
+              
         return games.to_form(game, message)
     
     @endpoints.method(request_message=USER_REQUEST,

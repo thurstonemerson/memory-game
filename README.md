@@ -1,5 +1,7 @@
 #Memory Game API for Google App Engine
 
+API explorer for deployed game can be found here: http://my-memory-game.appspot.com/_ah/api/explorer
+
 ## Set-Up Instructions:
 1.  Update the value of application in app.yaml to the app ID you have registered
  in the App Engine admin console and would like to use to host your instance of this sample.
@@ -96,9 +98,10 @@ ie each index begins at 0 not 1.
     For a users first guess, the card is flipped and a message is returned informing the user
     they have one more guess to make. For a users second guess, if a match is made the user is
     informed and the user's game score is incremented by one. If a match is not made, the user is
-    informed and the next turn will be the other user. 
-    If a match is made and this causes a game to end, a corresponding Score entity will be created,
+    informed and the next turn will be the other user - an email is sent to notify the other user it is 
+    their turn. If a match is made and this causes a game to end, a corresponding Score entity will be created,
     unless the game is tied, in which case the game will be deleted.
+    
     
  - **get_user_scores**
     - Path: 'scores/user/{name}'

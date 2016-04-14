@@ -12,11 +12,8 @@ handlers:
 - url: /_ah/spi/.*
   script: factory.application
 
-- url: /tasks/cache_average_attempts
+- url: /notify_user_of_turn
   script: tasks.app
-
-- url: /crons/send_reminder
-  script: main.app
   login: admin
 
 libraries:
