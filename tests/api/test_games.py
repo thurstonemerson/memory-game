@@ -98,8 +98,8 @@ class GameApiTest(MemoryGameUnitTest):
         self.assertEqual(resp.json['second_user_score'], "0")
         self.assertEqual(resp.json['history'], "[]")
         
-    @patch('config.DEBUG', True)
-    def test_make_move_no_match(self):
+    @patch('games.taskqueue')
+    def test_make_move_no_match(self, mock_taskqueue):
         """Functional test for api call to make a move"""
         #create the api 
         api_call = '/_ah/spi/GameApi.make_move'
@@ -125,8 +125,8 @@ class GameApiTest(MemoryGameUnitTest):
         self.assertTrue(game.board[0][1].flipped)
         self.assertTrue(resp.json['history'], "[good golly:DEATH:0:0:FOOL:0:1:False]")
     
-    @patch('config.DEBUG', True)
-    def test_make_move_made_match(self):
+    @patch('games.taskqueue')
+    def test_make_move_made_match(self, mock_taskqueue):
         """Functional test for api call to make a move"""
         #create the api 
         api_call = '/_ah/spi/GameApi.make_move'
@@ -159,8 +159,8 @@ class GameApiTest(MemoryGameUnitTest):
         resp = testapp.post_json(api_call, request)
         self.assertEqual(resp.json['history'], "[good golly:DEATH:0:0:DEATH:0:2:True, good golly:HERMIT:3:3:TEMPERANCE:3:2:False]")  
       
-    @patch('config.DEBUG', True)    
-    def test_make_move_game_not_found(self):
+    @patch('games.taskqueue')   
+    def test_make_move_game_not_found(self, mock_taskqueue):
         """Functional test for api call to make a move"""
         #create the api 
         api_call = '/_ah/spi/GameApi.make_move'
@@ -178,8 +178,8 @@ class GameApiTest(MemoryGameUnitTest):
         request = {"urlsafe_game_key":"asadfdsf", "name":first_user.name,  "row":0, "column":1} 
         self.assertRaises(Exception, testapp.post_json, api_call, request)
        
-    @patch('config.DEBUG', True)
-    def test_make_move_game_already_over(self):
+    @patch('games.taskqueue')
+    def test_make_move_game_already_over(self, mock_taskqueue):
         """Functional test for api call to make a move"""
         #create the api 
         api_call = '/_ah/spi/GameApi.make_move'
@@ -196,8 +196,8 @@ class GameApiTest(MemoryGameUnitTest):
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":0, "column":1} 
         self.assertRaises(Exception, testapp.post_json, api_call, request)
        
-    @patch('config.DEBUG', True)
-    def test_make_move_invalid_move(self):
+    @patch('games.taskqueue')
+    def test_make_move_invalid_move(self, mock_taskqueue):
         """Functional test for api call to make a move"""
         #create the api 
         api_call = '/_ah/spi/GameApi.make_move'
@@ -219,8 +219,8 @@ class GameApiTest(MemoryGameUnitTest):
         request = {"urlsafe_game_key":game.key.urlsafe(), "name":first_user.name,  "row":0, "column":0} 
         self.assertRaises(Exception, testapp.post_json, api_call, request)
        
-    @patch('config.DEBUG', True) 
-    def test_make_move_winner_loser_score(self):
+    @patch('games.taskqueue') 
+    def test_make_move_winner_loser_score(self, mock_taskqueue):
         """Functional test for api call to make a move"""
         #create the api 
         api_call = '/_ah/spi/GameApi.make_move'
@@ -300,8 +300,8 @@ class GameApiTest(MemoryGameUnitTest):
         self.assertEqual(score.loser_score, game.second_user_score)
         self.assertEqual(score.date, date.today())
         
-    @patch('config.DEBUG', True)
-    def test_make_move_draw(self):
+    @patch('games.taskqueue')
+    def test_make_move_draw(self, mock_taskqueue):
         """Functional test for api call to make a move"""
         #create the api 
         api_call = '/_ah/spi/GameApi.make_move'

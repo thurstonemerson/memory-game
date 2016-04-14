@@ -173,8 +173,8 @@ class GameTest(MemoryGameUnitTest):
         game_form = games.to_form(game, message)
         self.assertEqual(second_user.name, game_form.next_move)
         
-    @patch('config.DEBUG', True)
-    def test_make_move_game_ended(self): 
+    @patch('games.taskqueue')
+    def test_make_move_game_ended(self, mock_taskqueue): 
         """Test that a game is ended when all pairs are found"""  
         (game, first_user, second_user) = self._get_new_game_with_mock_gridboard()
         
@@ -215,7 +215,8 @@ class GameTest(MemoryGameUnitTest):
         self.assertEqual(game.winner, first_user.key)
         self.assertEqual(game.loser, second_user.key)
         
-    def test_draw(self): 
+    @patch('games.taskqueue')        
+    def test_draw(self, mock_taskqueue): 
         """Test that a draw results in no winner being assigned"""  
         (game, first_user, second_user) = self._get_new_game_with_mock_gridboard()
         
@@ -258,8 +259,8 @@ class GameTest(MemoryGameUnitTest):
         self.assertIsNone(game.winner)
         self.assertIsNone(game.loser)
         
-    @patch('config.DEBUG', True)
-    def test_make_move_match_made(self):    
+    @patch('games.taskqueue')
+    def test_make_move_match_made(self, mock_taskqueue):    
         """Test that a move can be played where the cards match"""  
         
         (game, first_user, second_user) = self._get_new_game_with_mock_gridboard()
@@ -300,8 +301,8 @@ class GameTest(MemoryGameUnitTest):
         self.assertEqual(game.first_user_score, 1)
         self.assertEqual(game.second_user_score, 0)
         
-    @patch('config.DEBUG', True)
-    def test_make_move_match_not_made(self):    
+    @patch('games.taskqueue')
+    def test_make_move_match_not_made(self, mock_taskqueue):    
         """Test that a move can be played where the cards don't match""" 
         (game, first_user, second_user) = self._get_new_game_with_mock_gridboard()
         unmatched_pairs_temp = game.unmatched_pairs

@@ -213,9 +213,8 @@ class GamesService(Service):
             else: #We didn't make a match, so it is the other players turn
                 game.next_move = game.second_user if first_user else game.first_user
                 
-                if not DEBUG:
-                    # Add a task to the queue to notify the other user that it is their turn
-                    taskqueue.add(url='/notify_user_of_turn', params={'user':game.next_move.get().name})    
+                # Add a task to the queue to notify the other user that it is their turn
+                taskqueue.add(url='/notify_user_of_turn', params={'user':game.next_move.get().name})    
        
                 #add the turn to the game history
                 self._add_history(game, first_user, match_made=False)  
