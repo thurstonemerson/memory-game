@@ -14,6 +14,9 @@ The board is represented as a 2D list of cards with XXX indicating an unflipped 
 [XXX, XXX, XXX, XXX],   
 [XXX, XXX, XXX, HERMIT]  
 
+To make a move, row and column values must be represented in array index values,
+ie each index begins at 0 not 1.
+
 ## Technical information
 
 This 2-player game API is written in Python with the Google App Engine SDK using NoSQL database Google Cloud Datastore.
@@ -25,7 +28,35 @@ You'll need the following for your development environment:
 
 - [Python](http://www.python.org)
 - [Google App Engine Python SDK](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python)
-- [virtualenv](https://python-guide.readthedocs.org/en/latest/dev/virtualenvs/#virtualenv) (recommended)
+ 
+## Local Installation
+
+The following assumes you have all of the tools listed above installed.
+
+1. Clone the project:
+
+    ```
+	$ git clone https://github.com/thurstonemerson/memory-game.git
+	$ cd memory-game
+    ```
+
+1. Select or create a Cloud Platform Console project from [here](https://console.cloud.google.com/project), noting the app ID.
+
+1.  Update the value of application in app.yaml to the app ID you registered in the above step.
+ 
+1.  Run the app with the devserver using dev_appserver.py DIR, and ensure it's
+ running by visiting the local [API Explorer](http://localhost:8080/_ah/api/explorer).
+ 
+1.  (Optional) Generate your client library with the endpoints tool.
+ Deploy your application.
+ 
+## Testing:
+
+A suite of functional API tests and unit tests are included in the source. To run them, alter the
+SDK_PATH in the config.py file and insert the path to the google app engine sdk. Tests
+can be launched with the following command:
+
+	python test_runner.py
  
  
 ## API Testing
@@ -38,55 +69,11 @@ a boolean value indicating whether or not the card has been flipped:
 [FOOL:False, HIGH_PRIESTESS:False, LOVERS:False, HERMIT:False]]  
 
 To see the 2D list of cards with boolean value, change the DEBUG setting in the
-config.py file to True.
-
-To make a move, row and column values must be represented in array index values,
-ie each index begins at 0 not 1.
-
-## Set-Up Instructions:
-1.  Update the value of application in app.yaml to the app ID you have registered
- in the App Engine admin console and would like to use to host your instance of this sample.
-1.  Run the app with the devserver using dev_appserver.py DIR, and ensure it's
- running by visiting the API Explorer - by default localhost:8080/_ah/api/explorer.
-1.  (Optional) Generate your client library(ies) with the endpoints tool.
- Deploy your application.
- 
-## Testing:
-
-A suite of functional API tests and unit tests are included in the source. To run them, alter the
-SDK_PATH in the config.py file and insert the path to the google app engine sdk. Tests
-can be launched with the following command:
-
-	python test_runner.py
- 
- 
-##Game Description:
+config.py file to True. 
 
 
-Each board contains a pair of cards from the 8 possible card types:
-DEATH,TEMPERANCE,HIGH_PRIESTESS,HERMIT,HANGED_MAN,LOVERS,JUSTICE,FOOL
+## Generated Endpoints
 
-The board is represented as a 2D list of cards with XXX indicating an unflipped
-card and the card name indicating a flipped card:
-[[XXX, XXX, XXX, XXX], 
-[XXX, HANGED_MAN, XXX, XXX], 
-[XXX, XXX, XXX, XXX], 
-[XXX, XXX, XXX, HERMIT]
-
-For API testing purposes, a board may be represented as a 2D list of cards and
-a boolean value indicating whether or not the card has been flipped:
-[[FOOL:False, TEMPERANCE:False, LOVERS:False, HANGED_MAN:False], 
-[TEMPERANCE:False, HANGED_MAN:False, JUSTICE:False, DEATH:False], 
-[HERMIT:False, DEATH:False, JUSTICE:False, HIGH_PRIESTESS:False], 
-[FOOL:False, HIGH_PRIESTESS:False, LOVERS:False, HERMIT:False]]
-
-To see the 2D list of cards with boolean value, change the DEBUG setting in the
-config.py file to True.
-
-To make a move, row and column values must be represented in array index values,
-ie each index begins at 0 not 1.
-
-##Endpoints Included:
  - **create_user**
     - Path: 'user'
     - Method: POST
@@ -175,7 +162,8 @@ ie each index begins at 0 not 1.
     card name, row number, and columne number:
     eg. [patrick:FOOL:0:0:HANGED_MAN:1:0:False, timothy:JUSTICE:2:0:LOVERS:2:2:False]
 
-##Models Included:
+## Models
+
  - **User**
     - Stores unique user_name and (optional) email address.
     - Also keeps track of wins and total_played.
@@ -188,7 +176,8 @@ ie each index begins at 0 not 1.
     - Records completed games. Associated with Users model via KeyProperty as
     well.
     
-##Forms Included:
+## Forms
+
  - **GameForm**
     - Representation of a Game's state (urlsafe_key, board,
     user_x, user_o, game_over, winner, next_move, unmatched_pairs, first_user_score, 
@@ -219,5 +208,4 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
     
