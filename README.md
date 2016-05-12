@@ -1,6 +1,47 @@
-#Memory Game API for Google App Engine
+# Memory Game API for Google App Engine
 
-API explorer for deployed game can be found here: http://my-memory-game.appspot.com/_ah/api/explorer
+In this simple 2 player game of memory beloved by children the world round, you flip two cards to make a match. 
+If they match you can have another turn, otherwise it is the next player's turn. Whoever collects the most pairs is the winner! 
+
+The API explorer for the deployed game can be found here: http://my-memory-game.appspot.com/_ah/api/explorer
+
+Each game board contains a pair of cards from the 8 possible card types:  
+DEATH, TEMPERANCE, HIGH_PRIESTESS, HERMIT, HANGED_MAN, LOVERS, JUSTICE, FOOL
+
+The board is represented as a 2D list of cards with XXX indicating an unflipped card and the card name indicating a flipped card:  
+[[XXX, XXX, XXX, XXX],  
+[XXX, HANGED_MAN, XXX, XXX],  
+[XXX, XXX, XXX, XXX],   
+[XXX, XXX, XXX, HERMIT]  
+
+## Technical information
+
+This 2-player game API is written in Python with the Google App Engine SDK using NoSQL database Google Cloud Datastore.
+The API allows users to play a game of memory against each other with endpoints to retrieve player rankings, game scores and match history.
+
+## Environment
+
+You'll need the following for your development environment:
+
+- [Python](http://www.python.org)
+- [Google App Engine Python SDK](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python)
+- [virtualenv](https://python-guide.readthedocs.org/en/latest/dev/virtualenvs/#virtualenv) (recommended)
+ 
+ 
+## API Testing
+
+For API testing purposes, a board may be represented as a 2D list of cards and
+a boolean value indicating whether or not the card has been flipped:   
+[[FOOL:False, TEMPERANCE:False, LOVERS:False, HANGED_MAN:False],   
+[TEMPERANCE:False, HANGED_MAN:False, JUSTICE:False, DEATH:False],  
+[HERMIT:False, DEATH:False, JUSTICE:False, HIGH_PRIESTESS:False],   
+[FOOL:False, HIGH_PRIESTESS:False, LOVERS:False, HERMIT:False]]  
+
+To see the 2D list of cards with boolean value, change the DEBUG setting in the
+config.py file to True.
+
+To make a move, row and column values must be represented in array index values,
+ie each index begins at 0 not 1.
 
 ## Set-Up Instructions:
 1.  Update the value of application in app.yaml to the app ID you have registered
@@ -10,7 +51,7 @@ API explorer for deployed game can be found here: http://my-memory-game.appspot.
 1.  (Optional) Generate your client library(ies) with the endpoints tool.
  Deploy your application.
  
-##Testing:
+## Testing:
 
 A suite of functional API tests and unit tests are included in the source. To run them, alter the
 SDK_PATH in the config.py file and insert the path to the google app engine sdk. Tests
@@ -21,9 +62,6 @@ can be launched with the following command:
  
 ##Game Description:
 
-Which player has the better memory? In this simple 2 player game of memory beloved by children the world round,
-you flip two cards and remember the pictures on them. If you don't get a match then it is the next player's turn.
-If you get a match, then you can flip two more cards! Whoever collects more pairs is the winner. 
 
 Each board contains a pair of cards from the 8 possible card types:
 DEATH,TEMPERANCE,HIGH_PRIESTESS,HERMIT,HANGED_MAN,LOVERS,JUSTICE,FOOL
